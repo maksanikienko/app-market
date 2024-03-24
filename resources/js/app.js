@@ -1,6 +1,5 @@
-import './bootstrap';
-import '../css/bootstrap.min.css';
-import '../css/starter-template.css';
+import './bootstrap.js';
+import './custom-script.js';
 import.meta.glob([
     '../images/categories/**',
     '../images/products/**',

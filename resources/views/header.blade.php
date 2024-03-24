@@ -8,12 +8,19 @@
                 <li  class="active" ><a href="{{ route('index') }}">Все товары</a></li>
                 <li><a href="{{ route('categories') }}">Категории</a></li>
                 </li>
-                <li ><a href="{{'basket'}}">В корзину</a></li>
-                <li><a href=" ">Сбросить проект в начальное состояние</a></li>
+                <li ><a href="{{ route('basket') }}">В корзину</a></li>
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-                <li><a href=" ">Панель администратора</a></li>
+                @guest
+                    <li><a href="{{ route('login') }}">Admin Panel</a></li>
+                @endguest
+
+                @auth
+                    <li><a>{{Auth::user()->name}}</a></li>
+                    <li><a href="{{ route('home') }}">Admin Panel</a></li>
+                    <li><a href="{{ route('get-logout') }}">Logout</a></li>
+                @endauth
             </ul>
         </div>
     </div>

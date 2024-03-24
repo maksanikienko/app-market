@@ -1,7 +1,6 @@
-@extends('base')
-    @section('content')
+@extends('layouts.base')
+@section('content')
 
-    <div class="starter-template">
 
         @foreach($categories as $category)
             <div class="panel">
@@ -15,5 +14,4 @@
             </div>
         @endforeach
 
-    </div>
 @endsection
