@@ -1,6 +1,6 @@
 <div class="col-sm-6 col-md-4">
     <div class="thumbnail">
-        <img src=" ">
+        <img src=" {{ Vite::asset('resources/images/products/' . $product->image) }} ">
         <div class="caption">
             <h3>{{$product->name}}</h3>
             <p>{{$product->price}}</p>
