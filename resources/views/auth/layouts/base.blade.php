@@ -21,9 +21,9 @@
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li ><a href=" {{route('categories.index')}}">Categories</a></li>
-                    <li ><a href=" ">Products</a>
+                    <li ><a href="{{ route('products.index') }} ">Products</a>
                     </li>
-                    <li ><a href=" ">Orders</a></li>
+                    <li ><a href="{{ route('home') }}">Orders</a></li>
                 </ul>
 
                 @guest
