@@ -22,10 +22,11 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'code' => 'required|min:3|max:20|unique:products,code',
-            'name' => 'required|min:3|max:20',
+            'code' => 'required|min:3|max:50|unique:products,code',
+            'name' => 'required|min:3|max:50',
             'description' => 'required|min:5',
-            'price' => 'required|numeric|min:1'
+            'price' => 'required|numeric|min:1',
+            'image' => 'required|image|mimes:png|dimensions:ratio=1'
         ];
 
         //If update product fields, except 'code' field, don't rewrite 'code'
@@ -34,5 +35,20 @@ class ProductRequest extends FormRequest
         }
 
         return $rules;
+    }
+    public function messages()
+    {
+
+        return [
+            'required' => 'Please enter a value for :attribute.',
+            'image.required' => 'Please upload an :attribute.',
+            'unique' => 'A unique value is required for the product code.',
+            'min' => 'Please enter at least :min characters.',
+            'price.numeric' => 'Price must be a numeric value.',
+            'image.image' => 'The uploaded file must be an image.',
+            'image.mimes' => 'Image file must be in .png format.',
+            'image.dimensions' => 'Image must have a 1:1 aspect ratio.'
+        ];
+
     }
 }

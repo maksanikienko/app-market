@@ -5,7 +5,7 @@
 @section('content')
         <h1>{{$category->name}}</h1>
         <p>{{ $category->description }}</p>
-        <p>Total: {{$category->products->count()}}</p>
+        <p>Total: {{$category->products->count()}} items</p>
 
         <div class="row">
             @foreach($category->products as $product)

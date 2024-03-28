@@ -6,7 +6,7 @@
         <h1>Confirm your order</h1>
         <div class="container">
             <div class="row justify-content-center">
-                <p>Full order price: <b>{{ $order->getFullPrice() }}</b></p>
+                <p>Full order price: <b>{{ $order->getFullPrice() }}$</b></p>
                 <form action=" {{ route('basket-confirm') }}" method="POST">
                     <div>
                         <p>Please provide your name and phone number so that our manager can contact you:</p>

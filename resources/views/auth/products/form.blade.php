@@ -29,6 +29,10 @@
 
                     <div class="input-group">
                     <label for="code" class="col-form-label">Code: </label>
+                        <!-- Display error msg from ProductRequest -->
+                        @error('code')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                         <input type="text" class="form-control" name="code" id="code"
                                value="@isset($product){{ $product->code }}@endisset">
                     </div>
@@ -37,6 +41,9 @@
 
                 <div class="input-group">
                     <label for="name" class=" col-form-label">Name: </label>
+                    @error('name')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
                         <input type="text" class="form-control" name="name" id="name"
                                value="@isset($product){{ $product->name }}@endisset">
                 </div>
@@ -62,6 +69,9 @@
 
                 <div class="input-group">
                     <label for="description" class="col-form-label">Description: </label>
+                    @error('description')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
 								<textarea name="description" id="description" cols="72"
                                           rows="7">@isset($product){{ $product->description }}@endisset</textarea>
                 </div>
@@ -70,8 +80,11 @@
 
                 <div class="input-group ">
                     <label for="image" class=" col-form-label">Image: </label>
+                    @error('image')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
                         <label class="btn btn-default btn-file">
-                            Download <input type="file" style="display: none;" name="image" id="image">
+                            Upload <input type="file" style="display: none;" name="image" id="image">
                         </label>
                 </div>
 
@@ -79,6 +92,9 @@
 
                 <div class="input-group ">
                     <label for="price" class=" col-form-label ">Price: </label>
+                    @error('price')
+                    <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
                         <input type="text" class="form-control " name="price" id="price"
                                value="@isset($product){{ $product->price }}@endisset">
                 </div>

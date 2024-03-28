@@ -5,7 +5,7 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li  class="active" ><a href="{{ route('index') }}">All products</a></li>
+                <li  class="active" ><a href="{{ route('index') }}">All items</a></li>
                 <li><a href="{{ route('categories') }}">Categories</a></li>
                 </li>
                 <li ><a href="{{ route('basket') }}">Cart</a></li>
@@ -13,12 +13,12 @@
 
             <ul class="nav navbar-nav navbar-right">
                 @guest
-                    <li><a href="{{ route('login') }}">Admin Panel</a></li>
+                    <li><a href="{{ route('login') }}">Admin</a></li>
                 @endguest
 
                 @auth
-                    <li><a>{{Auth::user()->name}}</a></li>
-                    <li><a href="{{ route('home') }}">Admin Panel</a></li>
+                    <li><a>Hello {{Auth::user()->name}}</a></li>
+                    <li><a href="{{ route('home') }}">Admin</a></li>
                     <li><a href="{{ route('get-logout') }}">Logout</a></li>
                 @endauth
             </ul>

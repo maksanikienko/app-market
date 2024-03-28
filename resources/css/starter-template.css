@@ -1,5 +1,7 @@
 body {
     padding-top: 70px;
+    padding-bottom: 70px;
+
 }
 
 .starter-template {
@@ -14,6 +16,20 @@ table {
 div.thumbnail img {
     max-height: 200px;
 }
+
+.thumbnail:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+/* category div */
+.panel:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+}
+.panel p {
+    color: inherit;
+    text-decoration: none;
+}
+
 
 div.form-inline form {
     display: inline;

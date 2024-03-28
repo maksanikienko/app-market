@@ -43,8 +43,8 @@
                                 </form>
                             </div>
                         </td>
-                        <td>{{ $product->price }} руб.</td>
-                        <td>{{ $product->getPriceForCount() }} руб.</td>
+                        <td>{{ $product->price }} $</td>
+                        <td>{{ $product->getPriceForCount() }} $</td>
                     </tr>
                 @endforeach
                 <tr>

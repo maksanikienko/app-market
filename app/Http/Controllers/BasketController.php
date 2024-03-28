@@ -14,9 +14,6 @@ class BasketController extends Controller
         $orderId = session('orderId');
         if (!is_null($orderId)) {
             $order = Order::findOrFail($orderId);
-        } else {
-            session()->flash('warning', 'Your shopping card is empty!');
-            return redirect()->route('index');
         }
         return view('basket', compact('order'));
     }

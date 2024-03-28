@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="col-md-12">
-        <h1>Заказы</h1>
+        <h1>Orders</h1>
         <table class="table">
             <tbody>
             <tr>
@@ -12,19 +12,19 @@
                     #
                 </th>
                 <th>
-                    Имя
+                    Name
                 </th>
                 <th>
-                    Телефон
+                    Phone
                 </th>
                 <th>
-                    Когда отправлен
+                    Order date
                 </th>
                 <th>
-                    Сумма
+                    Total
                 </th>
                 <th>
-                    Действия
+                    Actions
                 </th>
             </tr>
             @foreach($orders as $order)
@@ -33,11 +33,11 @@
                     <td>{{ $order->name }}</td>
                     <td>{{ $order->phone }}</td>
                     <td>{{ $order->created_at->format('H:i d/m/Y') }}</td>
-                    <td>{{ $order->getFullPrice() }} руб.</td>
+                    <td>{{ $order->getFullPrice() }} $</td>
                     <td>
                         <div class="btn-group" role="group">
                             <a class="btn btn-success" type="button"
-                               href="http://laravel-diplom-1.rdavydov.ru/admin/orders/1">Открыть</a>
+                               href=" ">Open</a>
                         </div>
                     </td>
                 </tr>

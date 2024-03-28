@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 class MainController extends Controller
 {
@@ -20,8 +19,9 @@ class MainController extends Controller
         $category = Category::where('code', $code)->first();
         return view('category', compact('category'));
     }
-    public function product($category, $product = null) {
-        return view('product',['product'=>$product]);
+    public function product($category, $product_code = null) {
+        $product = Product::where('code', $product_code)->first();
+        return view('product',compact('product'));
     }
 
 }

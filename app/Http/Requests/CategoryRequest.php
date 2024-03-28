@@ -33,4 +33,15 @@ class CategoryRequest extends FormRequest
 
         return $rules;
     }
+    public function messages()
+    {
+
+        return [
+            'required' => 'Please enter a value for :attribute.',
+            'unique' => 'A unique value is required for the category code.',
+            'min' => 'Please enter at least :min characters.',
+            
+        ];
+
+    }
 }

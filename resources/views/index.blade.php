@@ -1,6 +1,6 @@
 @extends('layouts.base')
 @section('content')
-            <h1>All Products</h1>
+            <h1>All Items</h1>
 
             <div class="row">
                 @foreach($products as $product)
