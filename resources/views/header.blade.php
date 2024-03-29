@@ -13,12 +13,18 @@
 
             <ul class="nav navbar-nav navbar-right">
                 @guest
-                    <li><a href="{{ route('login') }}">Admin</a></li>
+                    <li><a href="{{ route('login') }}">Login</a></li>
+                    <li><a href="{{ route('register') }}">Registration</a></li>
+
                 @endguest
 
                 @auth
-                    <li><a>Hello {{Auth::user()->name}}</a></li>
-                    <li><a href="{{ route('home') }}">Admin</a></li>
+                        @admin
+                        <li><a href="{{ route('home') }}">Admin</a></li>
+                    @else
+                        <li><a>Hello {{Auth::user()->name}}</a></li>
+                        <li><a href="{{ route('user.orders.index') }}">My Orders</a></li>
+                        @endadmin
                     <li><a href="{{ route('get-logout') }}">Logout</a></li>
                 @endauth
             </ul>

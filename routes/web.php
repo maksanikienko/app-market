@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\User\OrderController as UserOrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BasketController;
@@ -22,16 +23,28 @@ use Illuminate\Support\Facades\Route;
 Auth::routes();
 Route::get('/logout', [LoginController::class, 'logout'])->name('get-logout');
 
+Route::middleware(['auth'])->group(function () {
+    Route::group([
+        'prefix' => 'user',
+        'namespace' => 'User',
+        'as' => 'user.',
+    ], function () {
+        Route::get('/orders', [UserOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [UserOrderController::class, 'show'])->name('orders.show');
+
+        });
+
 Route::group([
-    'middleware' => 'auth',
     'namespace' => 'Admin',
     'prefix' => 'admin',
 ], function () {
     Route::group(['middleware' => 'is_admin'], function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('home');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     });
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+});
 });
 
 Route::get('/', [MainController::class, 'index'])->name('index');
@@ -44,7 +57,7 @@ Route::group(['prefix' => 'basket'], function () {
         'middleware' => 'basket_not_empty',
     ], function () {
         Route::get('/',[BasketController::class, 'basket'])->name('basket');
-        ROute::get('/place', [BasketController::class, 'basketPlace'])->name('basket-place');
+        Route::get('/place', [BasketController::class, 'basketPlace'])->name('basket-place');
         Route::post('/remove/{id}', [BasketController::class, 'basketRemove'])->name('basket-remove');
         Route::post('/place', [BasketController::class, 'basketConfirm'])->name('basket-confirm');
     });

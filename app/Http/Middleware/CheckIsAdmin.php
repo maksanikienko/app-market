@@ -19,7 +19,7 @@ class CheckIsAdmin
         $user = Auth::user();
 
         if (!$user->isAdmin()) {
-            session()->flash('warning', 'No permission');
+            session()->flash('warning', 'Access denied!');
             return redirect()->route('index');
         }
 

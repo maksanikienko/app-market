@@ -4,7 +4,7 @@
 
         @foreach($categories as $category)
             <a href="{{route('category', $category->code)}}">
-                <div class="panel">
+                <div class="panel-categories">
                         <img src=" {{ Vite::asset('public/storage/' . $category->image) }} ">
                         <h2>{{$category->name}}</h2>
                     <p>

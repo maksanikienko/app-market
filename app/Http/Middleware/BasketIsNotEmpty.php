@@ -14,7 +14,6 @@ class BasketIsNotEmpty
     public function handle($request, Closure $next): mixed
     {
         $orderId = session('orderId');
-
         if (!is_null($orderId)) {
             $order = Order::findOrFail($orderId);
             if ($order->products->count() > 0) {
