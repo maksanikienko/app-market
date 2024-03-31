@@ -24,7 +24,7 @@
                             <tr>
                                 <td>
                                     <a href="{{ route('product', [$product->category->code, $product->code, $product]) }}">
-                                        <img height="56px" src="{{ Vite::asset('public/storage/' . $product->image) }} ">
+                                        <img height="56px" src="{{ Vite::asset('storage/app/public/' . $product->image) }} ">
                                         {{ $product->name }}
                                     </a>
                                 </td>

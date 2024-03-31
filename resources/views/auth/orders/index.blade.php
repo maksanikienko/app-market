@@ -37,12 +37,14 @@
                     <td>
                         <div class="btn-group" role="group">
                             <a class="btn btn-success" type="button"
+
                                @admin
                                href="{{ route('orders.show', $order) }}"
                                @else
-                               href=" {{route('user.orders.show', $order)}}">Open</a>
-                            @endadmin
+                               href=" {{route('user.orders.show', $order)}}"
+                                @endadmin
 
+                            >Open</a>
                         </div>
                     </td>
                 </tr>

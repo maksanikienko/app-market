@@ -18,6 +18,14 @@
                 Home Page
             </a>
 
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#navbar"
+                    aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     @admin

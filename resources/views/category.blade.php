@@ -1,10 +1,10 @@
 @extends('layouts.base')
 
-@section('title', 'Категория ' . $category->name)
+@section('title', 'Category ' . $category->name)
 
 @section('content')
         <h1>{{$category->name}}</h1>
-        <p>{{ $category->description }}</p>
+        <p class="text-muted">{{ $category->description }}</p>
         <p>Total: {{$category->products->count()}} items</p>
 
         <div class="row">

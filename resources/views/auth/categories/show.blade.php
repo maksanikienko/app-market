@@ -34,7 +34,7 @@
             <tr>
                 <td>Image</td>
                 <td>
-                    <img src=" {{ Vite::asset('public/storage/'. $category->image) }} " height="240px">
+                    <img src=" {{ Vite::asset('storage/app/public/'. $category->image) }} " height="240px">
                 </td>
             </tr>
             <tr>

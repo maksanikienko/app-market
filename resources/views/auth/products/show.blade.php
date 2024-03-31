@@ -33,7 +33,7 @@
             </tr>
             <tr>
                 <td>Image</td>
-                <td><img src=" {{ Vite::asset('public/storage/' . $product->image) }} " height="240px"></td>
+                <td><img src=" {{ Vite::asset('storage/app/public/' . $product->image) }} " height="240px"></td>
             </tr>
             <tr>
                 <td>Category</td>
