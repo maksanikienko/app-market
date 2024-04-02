@@ -99,5 +99,21 @@ class BasketController extends Controller
 
         return redirect()->route('basket');
     }
+    public function basketRemoveAll($productId)
+    {
+        $orderId = session('orderId');
+        if (is_null($orderId)) {
+            return redirect()->route('basket');
+        }
+        $order = Order::find($orderId);
+
+        if ($order->products->contains($productId)) {
+            $order->products()->detach($productId);
+            $product = Product::find($productId);
+            session()->flash('warning', $product->name . ' completely deleted from the basket');
+        }
+
+        return redirect()->route('basket');
+    }
 
 }

@@ -59,6 +59,7 @@ Route::group(['prefix' => 'basket'], function () {
         Route::get('/',[BasketController::class, 'basket'])->name('basket');
         Route::get('/place', [BasketController::class, 'basketPlace'])->name('basket-place');
         Route::post('/remove/{id}', [BasketController::class, 'basketRemove'])->name('basket-remove');
+        Route::post('/remove-all/{id}', [BasketController::class, 'basketRemoveAll'])->name('basket-remove-all');
         Route::post('/place', [BasketController::class, 'basketConfirm'])->name('basket-confirm');
     });
 });
