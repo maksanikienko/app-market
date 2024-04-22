@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+
 Auth::routes();
 Route::get('/logout', [LoginController::class, 'logout'])->name('get-logout');
 

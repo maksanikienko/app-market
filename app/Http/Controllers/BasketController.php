@@ -4,18 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use Detection\MobileDetect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class BasketController extends Controller
 {
-    public function basket()
+    public function basket(): View
     {
+        //pachet detect if device mobile, choose this cause cart pages have diff templates n styles for devices;
+        $detect = new MobileDetect;
+
         $orderId = session('orderId');
         if (!is_null($orderId)) {
             $order = Order::findOrFail($orderId);
         }
-        return view('basket', compact('order'));
+        if ($detect->isMobile()) {
+            return view('basket_mobile', compact('order'));
+        } else {
+            return view('basket', compact('order'));
+        }
     }
     public function basketConfirm(Request $request)
     {

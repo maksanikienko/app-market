@@ -21,6 +21,12 @@ div.thumbnail img {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 /* category div */
+
+.panel-categories {
+    padding: 20px;
+    width: 50%;
+    margin: auto;
+}
 .panel-categories:hover {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
     border-radius: 20px;
