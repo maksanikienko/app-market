@@ -6,17 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ProductService;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    public ProductService $productService;
+
+    public function __construct(ProductService $productService) {
+//        $this->middleware('auth');
+        $this->productService = $productService;
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): \Illuminate\Database\Eloquent\Collection
     {
-        $products = Product::get();
-        return view('auth.products.index', compact('products'));
+//        $products = Product::get();
+//        return view('auth.products.index', compact('products'));
+        return $this->productService->getProducts();
     }
 
     /**

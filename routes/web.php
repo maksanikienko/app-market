@@ -1,70 +1,53 @@
 <?php
 
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\User\OrderController as UserOrderController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\MainController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| API Routes (JSON endpoints) 
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
+Route::prefix('api')->group(function () {
+    
+    Route::get('/products', [App\Http\Controllers\Api\ProductController::class, 'index'])->name('api.products');
+    Route::get('/products/featured', [App\Http\Controllers\Api\ProductController::class, 'featured'])->name('api.products.featured');
+    Route::get('/products/{id}', [App\Http\Controllers\Api\ProductController::class, 'show'])->where('id', '[0-9]+')->name('api.products.show');
+    Route::get('/categories', [App\Http\Controllers\Api\CategoryController::class, 'index'])->name('api.categories');
+    Route::get('/product/{id}', [MainController::class, 'product'])->name('api.product');
 
-
-Auth::routes();
-Route::get('/logout', [LoginController::class, 'logout'])->name('get-logout');
-
-Route::middleware(['auth'])->group(function () {
-    Route::group([
-        'prefix' => 'user',
-        'namespace' => 'User',
-        'as' => 'user.',
-    ], function () {
-        Route::get('/orders', [UserOrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [UserOrderController::class, 'show'])->name('orders.show');
-
-        });
-
-Route::group([
-    'namespace' => 'Admin',
-    'prefix' => 'admin',
-], function () {
-    Route::group(['middleware' => 'is_admin'], function () {
-        Route::get('/orders', [OrderController::class, 'index'])->name('home');
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::prefix('basket')->group(function () {
+        Route::post('/add/{id}', [BasketController::class, 'add'])->name('api.basket-add');
+        Route::get('/', [BasketController::class, 'index'])->name('api.basket');
+        Route::post('/remove/{id}', [BasketController::class, 'remove'])->name('api.basket-remove');
+        Route::post('/update', [BasketController::class, 'update'])->name('api.basket-update');
+        Route::post('/place', [BasketController::class, 'place'])->name('api.basket-place');
     });
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
-});
-});
 
-Route::get('/', [MainController::class, 'index'])->name('index');
-Route::get('/categories', [MainController::class, 'categories'])->name('categories');
-
-Route::group(['prefix' => 'basket'], function () {
-    Route::post('/add/{id}', [BasketController::class, 'basketAdd'])->name('basket-add');
-
-    Route::group([
-        'middleware' => 'basket_not_empty',
-    ], function () {
-        Route::get('/',[BasketController::class, 'basket'])->name('basket');
-        Route::get('/place', [BasketController::class, 'basketPlace'])->name('basket-place');
-        Route::post('/remove/{id}', [BasketController::class, 'basketRemove'])->name('basket-remove');
-        Route::post('/remove-all/{id}', [BasketController::class, 'basketRemoveAll'])->name('basket-remove-all');
-        Route::post('/place', [BasketController::class, 'basketConfirm'])->name('basket-confirm');
+//    Route::post('/basket/remove-all/{id}', [BasketController::class, 'basketRemoveAll'])->name('api.basket-remove-all');
+//    Route::post('/basket/place', [BasketController::class, 'basketConfirm'])->name('api.basket-confirm');
+    
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+        Route::get('/orders', [App\Http\Controllers\Admin\OrderController::class, 'index']);
+        Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
+        Route::apiResource('categories', App\Http\Controllers\Admin\CategoryController::class);
+        Route::apiResource('products', App\Http\Controllers\Admin\ProductController::class);
     });
 });
 
-Route::get('/{category}', [MainController::class, 'category'])->name('category');
-Route::get('/{category}/{product?}', [MainController::class, 'product'])->name('product');
+/*
+|--------------------------------------------------------------------------
+| Authentication (JSON endpoints)
+|--------------------------------------------------------------------------
+*/
+require __DIR__ . '/auth.php';
+
+/*
+|--------------------------------------------------------------------------
+| SPA Catch-all Route 
+|--------------------------------------------------------------------------
+*/
+Route::get('/{any?}', function () {
+    return view('app');
+})->where('any', '.*')->name('spa');

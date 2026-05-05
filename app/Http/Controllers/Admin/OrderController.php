@@ -8,13 +8,14 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
-        $orders = Order::where('status', 1)->get();
-        return view('auth.orders.index', compact('orders'));
+        $orders = Order::with('products')->where('status', 1)->latest()->get();
+
+        return response()->json($orders);
     }
-    public function show(Order $order)
+    public function show(\Illuminate\Http\Request $request, Order $order)
     {
-        return view('auth.orders.show', compact('order'));
+        return response()->json($order);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +25,26 @@ class RegisterController extends Controller
 
     use RegistersUsers;
 
+    public function register(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['required','string','max:255'],
+            'email' => ['required','email','unique:users,email'],
+            'password' => ['required','min:5','confirmed'],
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        Auth::login($user);
+
+        $request->session()->regenerate();
+
+        return response()->json($user);
+    }
     protected function redirectTo()
     {
         if (Auth::user()->isAdmin()) {
@@ -71,6 +92,14 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+        ]);
+    }
+    protected function registered($request, $user): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
         ]);
     }
 }

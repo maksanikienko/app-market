@@ -5,17 +5,23 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
+use App\Services\CategoryService;
 use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
+    public CategoryService $categoryService;
+    
+    public function __construct(CategoryService $categoryService) {
+        $this->categoryService = $categoryService;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $categories = Category::get();
-        return view('auth.categories.index', compact('categories'));
+        return $this->categoryService->getCategories();
     }
 
     /**
@@ -44,9 +50,9 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(\Illuminate\Http\Request $request, Category $category)
     {
-        return view('auth.categories.show', compact('category'));
+        return response()->json($category);
     }
 
     /**

@@ -4,125 +4,231 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
-use Detection\MobileDetect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 class BasketController extends Controller
 {
-    public function basket(): View
+    public function index(): JsonResponse
     {
-        //pachet detect if device mobile, choose this cause cart pages have diff templates n styles for devices;
-        $detect = new MobileDetect;
+        try {
+            $orderId = session('orderId');
+            $order = $orderId ? Order::with('products')->find($orderId) : null;
 
-        $orderId = session('orderId');
-        if (!is_null($orderId)) {
-            $order = Order::findOrFail($orderId);
-        }
-        if ($detect->isMobile()) {
-            return view('basket_mobile', compact('order'));
-        } else {
-            return view('basket', compact('order'));
+            return response()->json([
+                'success' => true,
+                'order' => $order,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get basket',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
-    public function basketConfirm(Request $request)
+
+    public function add($productId): JsonResponse
     {
-        $orderId = session('orderId');
-        if (is_null($orderId)) {
-            return redirect()->route('index');
-        }
-        $order = Order::find($orderId);
-        $success = $order->saveOrder($request->name, $request->phone);
+        try {
+            $orderId = session('orderId');
 
-        //Flash msg
-        if ($success) {
-            session()->flash('success', 'Your order confirmed!');
-        } else {
-            session()->flash('warning', 'Order processing error');
-        }
-
-        return redirect()->route('index');
-    }
-
-    public function basketPlace()
-    {
-        $orderId = session('orderId');
-        if (is_null($orderId)) {
-            return redirect()->route('index');
-        }
-        $order = Order::find($orderId);
-        return view('order', compact('order'));
-    }
-
-    public function basketAdd($productId)
-    {
-        $orderId = session('orderId');
-        if (is_null($orderId)) {
-            $order = Order::create();
-            session(['orderId' => $order->id]);
-        } else {
-            $order = Order::find($orderId);
-        }
-        //If product exist->count++ / else->add to basket
-        if ($order->products->contains($productId)) {
-            $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
-            $pivotRow->count++;
-            $pivotRow->update();
-        } else {
-            $order->products()->attach($productId);
-        }
-        //If User log in->user_id = Auth id
-        if (Auth::check()) {
-            $order->user_id = Auth::id();
-            $order->save();
-        }
-        //Flash msg
-        $product = Product::find($productId);
-        session()->flash('success', $product->name . ' Added to cart ' );
-
-        return redirect()->route('basket');
-    }
-
-    public function basketRemove($productId)
-    {
-        $orderId = session('orderId');
-        if (is_null($orderId)) {
-            return redirect()->route('basket');
-        }
-        $order = Order::find($orderId);
-
-        //If order has product ID->find
-        if ($order->products->contains($productId)) {
-            $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
-            //If count < 2-> remove from bskt / else->count--
-            if ($pivotRow->count < 2) {
-                $order->products()->detach($productId);
+            if (!$orderId) {
+                $order = Order::create();
+                session(['orderId' => $order->id]);
             } else {
-                $pivotRow->count--;
-                $pivotRow->update();
+                $order = Order::findOrFail($orderId);
             }
-        }
-        $product = Product::find($productId);
-        session()->flash('warning',  $product->name . ' deleted');
 
-        return redirect()->route('basket');
+            if ($order->products->contains($productId)) {
+                $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
+                $pivotRow->count++;
+                $pivotRow->update();
+            } else {
+                $order->products()->attach($productId);
+            }
+
+            if (Auth::check()) {
+                $order->user_id = Auth::id();
+                $order->save();
+            }
+
+            $product = Product::findOrFail($productId);
+
+            return response()->json([
+                'success' => true,
+                'message' => $product->name . ' added to basket',
+                'order' => $order->load('products')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add product to basket',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-    public function basketRemoveAll($productId)
+
+    public function remove($productId): JsonResponse
     {
+        try {
+            $orderId = session('orderId');
+            if (!$orderId) {
+                return response()->json(['success' => false, 'message' => 'Basket not found'], 404);
+            }
+
+            $order = Order::findOrFail($orderId);
+
+            if ($order->products->contains($productId)) {
+                $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
+
+                if ($pivotRow->count < 2) {
+                    $order->products()->detach($productId);
+                } else {
+                    $pivotRow->count--;
+                    $pivotRow->update();
+                }
+
+                $product = Product::findOrFail($productId);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => $product->name . ' removed from basket',
+                    'order' => $order->load('products')
+                ]);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Product not in basket'], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove product from basket',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function place(Request $request): JsonResponse
+    {
+        $request->validate([
+            'name'  => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+        ]);
+
         $orderId = session('orderId');
-        if (is_null($orderId)) {
-            return redirect()->route('basket');
-        }
-        $order = Order::find($orderId);
 
-        if ($order->products->contains($productId)) {
-            $order->products()->detach($productId);
-            $product = Product::find($productId);
-            session()->flash('warning', $product->name . ' completely deleted from the basket');
+        // Guests must have an active session order; auth users can use their basket relation
+        if ($orderId) {
+            $order = Order::with('products')->find($orderId);
+        } elseif (Auth::check()) {
+            $order = Auth::user()->basket()->with('products')->first();
+        } else {
+            $order = null;
         }
 
-        return redirect()->route('basket');
+        if (!$order || $order->products->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Cart is empty'], 422);
+        }
+
+        if ($order->status !== 0) {
+            return response()->json(['success' => false, 'message' => 'Order already placed'], 422);
+        }
+
+        $order->saveOrder(
+            $request->input('name', ''),
+            $request->input('phone', '')
+        );
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Order placed successfully!',
+            'order_id' => $order->id,
+        ]);
     }
 
+    public function update(Request $request): JsonResponse
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false
+            ], 401);
+        }
+
+        $order = Auth::user()->basket()->firstOrCreate([
+            'status' => 0
+        ]);
+
+        $order->products()->updateExistingPivot(
+            $request->product_id,
+            ['count' => $request->quantity]
+        );
+
+        return response()->json([
+            'success' => true
+        ]);
+    }
+
+//    public function basketRemoveAll($productId): JsonResponse
+//    {
+//        try {
+//            $orderId = session('orderId');
+//            if (!$orderId) {
+//                return response()->json(['success' => false, 'message' => 'Basket not found'], 404);
+//            }
+//
+//            $order = Order::findOrFail($orderId);
+//
+//            if ($order->products->contains($productId)) {
+//                $order->products()->detach($productId);
+//                $product = Product::findOrFail($productId);
+//
+//                return response()->json([
+//                    'success' => true,
+//                    'message' => $product->name . ' completely removed from basket',
+//                    'order' => $order->load('products')
+//                ]);
+//            }
+//
+//            return response()->json(['success' => false, 'message' => 'Product not in basket'], 404);
+//        } catch (\Exception $e) {
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'Failed to remove product from basket',
+//                'error' => $e->getMessage(),
+//            ], 500);
+//        }
+//    }
+//
+//    public function basketConfirm(Request $request): JsonResponse
+//    {
+//        try {
+//            $orderId = session('orderId');
+//            if (!$orderId) {
+//                return response()->json(['success' => false, 'message' => 'Basket not found'], 404);
+//            }
+//
+//            $order = Order::findOrFail($orderId);
+//
+//            $success = $order->saveOrder($request->name, $request->phone);
+//
+//            if ($success) {
+//                session()->forget('orderId');
+//                return response()->json([
+//                    'success' => true,
+//                    'message' => 'Your order is confirmed!'
+//                ]);
+//            }
+//
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'Order processing error'
+//            ]);
+//        } catch (\Exception $e) {
+//            return response()->json([
+//                'success' => false,
+//                'message' => 'Failed to confirm order',
+//                'error' => $e->getMessage(),
+//            ], 500);
+//        }
+//    }
 }
