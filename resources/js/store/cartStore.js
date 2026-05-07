@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import CartService from '@/services/CartService';
+import CartService from './../services/cartService.js';
 
 export const useCartStore = defineStore('cart', () => {
     const items = ref([]);
