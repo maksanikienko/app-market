@@ -10,7 +10,10 @@ class OrderController extends Controller
 {
     public function index(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
-        $orders = Order::with('products')->where('status', 1)->latest()->get();
+        $orders = Order::with(['products', 'products.media'])
+            ->where('status', 1)
+            ->latest()
+            ->get();
 
         return response()->json($orders);
     }

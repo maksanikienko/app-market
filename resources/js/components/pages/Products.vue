@@ -1,131 +1,139 @@
 <template>
   <div class="space-y-6">
 
-    <!-- Header -->
-    <div class="flex flex-col gap-1">
-      <h1 class="text-3xl font-bold">Products</h1>
-      <p v-if="!loading" class="text-sm text-muted-foreground">
-        {{ meta.total }} items found
-      </p>
-    </div>
+    <!-- Page header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-stone-900">{{ t('products.title') }}</h1>
+        <p v-if="!loading" class="text-xs text-stone-400 mt-0.5">{{ meta.total }} {{ t('products.found') }}</p>
+      </div>
 
-    <!-- Toolbar -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div class="flex items-center gap-3">
+        <!-- Mobile filter button -->
+        <button
+          @click="filterStore.openMobileFilter()"
+          class="md:hidden flex items-center gap-1.5 h-9 px-3 text-xs font-medium border border-stone-200 rounded-lg text-stone-600 hover:bg-stone-100 transition-colors"
+        >
+          <SlidersHorizontal class="h-3.5 w-3.5" />
+          {{ t('filter.open') }}
+          <span v-if="filterStore.hasAnyFilter" class="ml-0.5 h-4 w-4 bg-stone-900 text-white text-[9px] rounded-full flex items-center justify-center font-semibold">
+            {{ activeFilterCount }}
+          </span>
+        </button>
+
+        <!-- Search -->
         <div class="relative">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          <Input
-              v-model="searchQuery"
-              placeholder="Search products..."
-              class="pl-9 w-full sm:w-64"
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400 pointer-events-none" />
+          <input
+            v-model="searchQuery"
+            :placeholder="t('products.search')"
+            class="h-9 pl-9 pr-3 w-56 text-sm rounded-lg border border-stone-200 bg-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors"
           />
         </div>
 
-        <Button
-            v-if="filterStore.hasCategoryFilter || filterStore.hasPriceFilter"
-            variant="ghost"
-            size="sm"
-            @click="clearFilters"
-            class="text-destructive hover:text-destructive"
-        >
-          <X class="h-4 w-4 mr-1" />
-          Clear filters
-        </Button>
-      </div>
-
-      <!-- Per page + Sort -->
-      <div class="flex items-center gap-2">
+        <!-- Per page -->
         <Select v-model="perPage" @update:model-value="goToPage(1)">
-          <SelectTrigger class="w-24">
+          <SelectTrigger class="h-9 w-20 text-sm border-stone-200">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="12">12 / page</SelectItem>
-            <SelectItem value="24">24 / page</SelectItem>
-            <SelectItem value="48">48 / page</SelectItem>
+            <SelectItem value="12">12</SelectItem>
+            <SelectItem value="24">24</SelectItem>
+            <SelectItem value="48">48</SelectItem>
           </SelectContent>
         </Select>
+
+        <!-- Clear filters -->
+        <button
+          v-if="filterStore.hasAnyFilter"
+          @click="clearFilters"
+          class="flex items-center gap-1.5 h-9 px-3 text-xs text-stone-500 hover:text-red-500 border border-stone-200 rounded-lg transition-colors"
+        >
+          <X class="h-3.5 w-3.5" />
+          {{ t('products.clearFilter') }}
+        </button>
       </div>
     </div>
 
-    <!-- Loading skeleton -->
-    <div v-if="loading" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      <Skeleton v-for="i in parseInt(perPage)" :key="i" class="h-64 rounded-xl" />
+    <!-- Active filter chips -->
+    <div v-if="filterStore.hasAnyFilter" class="flex flex-wrap gap-2">
+      <span
+        v-for="color in filterStore.colors" :key="`c-${color}`"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-wider font-medium border border-stone-200 rounded-full text-stone-600"
+      >
+        <span class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: colorHex(color) }" />
+        {{ color }}
+        <button @click="filterStore.toggleColor(color)" class="text-stone-400 hover:text-stone-700 ml-0.5">×</button>
+      </span>
+      <span
+        v-for="size in filterStore.sizes" :key="`s-${size}`"
+        class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] uppercase tracking-wider font-medium border border-stone-200 rounded-full text-stone-600"
+      >
+        {{ size }}
+        <button @click="filterStore.toggleSize(size)" class="text-stone-400 hover:text-stone-700">×</button>
+      </span>
     </div>
 
-    <!-- Product grid -->
+    <!-- Grid -->
+    <div v-if="loading" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+      <div v-for="i in parseInt(perPage)" :key="i" class="bg-stone-100 rounded-xl aspect-[3/4] animate-pulse" />
+    </div>
+
     <template v-else>
-      <div v-if="products.length" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div v-if="products.length" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <ProductCard
-            v-for="product in products"
-            :key="product.id"
-            :product="product"
-            @add-to-cart="handleAddToCart"
+          v-for="product in products"
+          :key="product.id"
+          :product="product"
         />
       </div>
 
-      <!-- Empty state -->
-      <div v-else class="flex h-64 items-center justify-center rounded-lg border border-dashed">
-        <div class="text-center space-y-3">
-          <ShoppingBag class="h-12 w-12 mx-auto text-muted-foreground" />
-          <p class="font-medium">No products found</p>
-          <p class="text-sm text-muted-foreground">Try adjusting your filters or search query</p>
-        </div>
+      <div v-else class="flex flex-col items-center justify-center py-20 text-center">
+        <ShoppingBag class="h-10 w-10 text-stone-300 mb-4" />
+        <p class="text-sm font-medium text-stone-900">{{ t('products.empty.title') }}</p>
+        <p class="text-xs text-stone-400 mt-1">{{ t('products.empty.hint') }}</p>
       </div>
     </template>
 
     <!-- Pagination -->
     <div v-if="meta.last_page > 1" class="flex items-center justify-between pt-2">
-      <p class="text-sm text-muted-foreground">
-        Page {{ meta.current_page }} of {{ meta.last_page }}
+      <p class="text-xs text-stone-400">
+        {{ t('products.page') }} {{ meta.current_page }} {{ t('products.of') }} {{ meta.last_page }}
       </p>
 
       <div class="flex items-center gap-1">
-        <Button
-            variant="outline"
-            size="icon"
-            :disabled="meta.current_page === 1"
-            @click="goToPage(1)"
-            title="First page"
-        >
-          <ChevronsLeft class="h-4 w-4" />
-        </Button>
-        <Button
-            variant="outline"
-            size="icon"
-            :disabled="meta.current_page === 1"
-            @click="goToPage(meta.current_page - 1)"
-        >
-          <ChevronLeft class="h-4 w-4" />
-        </Button>
+        <button
+          :disabled="meta.current_page === 1"
+          @click="goToPage(1)"
+          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        ><ChevronsLeft class="h-3.5 w-3.5" /></button>
+        <button
+          :disabled="meta.current_page === 1"
+          @click="goToPage(meta.current_page - 1)"
+          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        ><ChevronLeft class="h-3.5 w-3.5" /></button>
 
-        <Button
-            v-for="page in visiblePages"
-            :key="page"
-            :variant="page === meta.current_page ? 'default' : 'outline'"
-            size="icon"
-            @click="goToPage(page)"
-        >
-          {{ page }}
-        </Button>
+        <button
+          v-for="page in visiblePages" :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'h-8 w-8 flex items-center justify-center rounded-lg text-xs font-medium transition-colors',
+            page === meta.current_page
+              ? 'bg-stone-900 text-white'
+              : 'border border-stone-200 text-stone-600 hover:bg-stone-100'
+          ]"
+        >{{ page }}</button>
 
-        <Button
-            variant="outline"
-            size="icon"
-            :disabled="meta.current_page === meta.last_page"
-            @click="goToPage(meta.current_page + 1)"
-        >
-          <ChevronRight class="h-4 w-4" />
-        </Button>
-        <Button
-            variant="outline"
-            size="icon"
-            :disabled="meta.current_page === meta.last_page"
-            @click="goToPage(meta.last_page)"
-            title="Last page"
-        >
-          <ChevronsRight class="h-4 w-4" />
-        </Button>
+        <button
+          :disabled="meta.current_page === meta.last_page"
+          @click="goToPage(meta.current_page + 1)"
+          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        ><ChevronRight class="h-3.5 w-3.5" /></button>
+        <button
+          :disabled="meta.current_page === meta.last_page"
+          @click="goToPage(meta.last_page)"
+          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        ><ChevronsRight class="h-3.5 w-3.5" /></button>
       </div>
     </div>
 
@@ -134,46 +142,62 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useDebounceFn } from '@vueuse/core';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import ProductCard from '@/components/parts/ProductCard.vue';
-import { ShoppingBag, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
+import { ShoppingBag, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, SlidersHorizontal } from 'lucide-vue-next';
 import { useProductService } from '@/services/productService.js';
 import { useFilterStore } from '@/store/filterStore.js';
-import { useCartStore } from '@/store/cartStore.js';
+import { useI18n } from '@/i18n';
 
-const route  = useRoute();
-const router = useRouter();
+const route       = useRoute();
 const { getProducts } = useProductService();
 const filterStore = useFilterStore();
-const cartStore   = useCartStore();
+const { t }       = useI18n();
 
-const products   = ref([]);
-const loading    = ref(true);
+const products    = ref([]);
+const loading     = ref(true);
 const searchQuery = ref('');
-const perPage    = ref('12');
-const meta = ref({
-  current_page: 1,
-  last_page: 1,
-  per_page: 12,
-  total: 0,
-});
+const perPage     = ref('12');
+const meta = ref({ current_page: 1, last_page: 1, per_page: 12, total: 0 });
 
-// ── Fetch ─────────────────────────────────────────────────────────────────────
+const colorHex = (_name) => '#1c1917';
+
+const activeFilterCount = computed(() =>
+  filterStore.selectedCategories.length +
+  filterStore.outerMaterials.length +
+  filterStore.liningMaterials.length +
+  filterStore.fillings.length +
+  filterStore.seasons.length +
+  filterStore.lengths.length +
+  filterStore.colors.length +
+  filterStore.sizes.length +
+  (filterStore.priceRange.min !== null ? 1 : 0) +
+  (filterStore.priceRange.max !== null ? 1 : 0) +
+  (filterStore.hood !== null ? 1 : 0) +
+  (filterStore.waterproof !== null ? 1 : 0)
+);
+
 const fetchProducts = async (page = 1) => {
   loading.value = true;
   try {
     const result = await getProducts({
       page,
-      perPage: parseInt(perPage.value),
-      search: searchQuery.value || undefined,
-      categories: filterStore.selectedCategories,
-      priceMin: filterStore.priceRange.min ?? undefined,
-      priceMax: filterStore.priceRange.max ?? undefined,
+      perPage:         parseInt(perPage.value),
+      search:          searchQuery.value || undefined,
+      categories:      filterStore.selectedCategories,
+      priceMin:        filterStore.priceRange.min  ?? undefined,
+      priceMax:        filterStore.priceRange.max  ?? undefined,
+      outerMaterials:  filterStore.outerMaterials,
+      liningMaterials: filterStore.liningMaterials,
+      fillings:        filterStore.fillings,
+      seasons:         filterStore.seasons,
+      lengths:         filterStore.lengths,
+      hood:            filterStore.hood,
+      waterproof:      filterStore.waterproof,
+      colors:          filterStore.colors,
+      sizes:           filterStore.sizes,
     });
     products.value = result.data;
     meta.value     = result.meta;
@@ -184,7 +208,6 @@ const fetchProducts = async (page = 1) => {
   }
 };
 
-// ── Pagination ────────────────────────────────────────────────────────────────
 const goToPage = (page) => {
   fetchProducts(page);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -193,43 +216,38 @@ const goToPage = (page) => {
 const visiblePages = computed(() => {
   const current = meta.value.current_page;
   const last    = meta.value.last_page;
-  const delta   = 2;
   const pages   = [];
-
-  for (let i = Math.max(1, current - delta); i <= Math.min(last, current + delta); i++) {
-    pages.push(i);
-  }
+  for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) pages.push(i);
   return pages;
 });
 
-// ── Debounced search ──────────────────────────────────────────────────────────
 const debouncedSearch = useDebounceFn(() => fetchProducts(1), 400);
 watch(searchQuery, debouncedSearch);
 
-// ── Re-fetch when AsidePanel filters change ───────────────────────────────────
-// Watch store state directly (getter fn) — reliable with Pinia Options API splice mutations
 watch(
-  () => [filterStore.selectedCategories.slice(), filterStore.priceRange.min, filterStore.priceRange.max],
+  () => [
+    filterStore.selectedCategories.slice(),
+    filterStore.priceRange.min,
+    filterStore.priceRange.max,
+    filterStore.outerMaterials.slice(),
+    filterStore.liningMaterials.slice(),
+    filterStore.fillings.slice(),
+    filterStore.seasons.slice(),
+    filterStore.lengths.slice(),
+    filterStore.hood,
+    filterStore.waterproof,
+    filterStore.colors.slice(),
+    filterStore.sizes.slice(),
+  ],
   () => fetchProducts(1),
-  { deep: true }
+  { deep: true },
 );
 
-// ── Handle ?category= query param from Home page links ───────────────────────
 onMounted(async () => {
-  if (route.query.category) {
-    filterStore.toggleCategory(parseInt(route.query.category));
-  }
+  if (route.query.category) filterStore.toggleCategory(parseInt(route.query.category));
   await fetchProducts(1);
 });
 
-// ── Add to cart ────────────────────────────────────────────────────────────────
-const handleAddToCart = async (product) => {
-  try {
-    await cartStore.add(product.id);
-  } catch (e) {
-    console.error('Failed to add to cart:', e);
-  }
-};
 
 const clearFilters = () => filterStore.reset();
 </script>

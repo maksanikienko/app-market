@@ -13,8 +13,11 @@ Route::prefix('api')->group(function () {
     
     Route::get('/products', [App\Http\Controllers\Api\ProductController::class, 'index'])->name('api.products');
     Route::get('/products/featured', [App\Http\Controllers\Api\ProductController::class, 'featured'])->name('api.products.featured');
+    Route::get('/products/variant-options', [App\Http\Controllers\Api\ProductController::class, 'variantOptions'])->name('api.products.variant-options');
     Route::get('/products/{id}', [App\Http\Controllers\Api\ProductController::class, 'show'])->where('id', '[0-9]+')->name('api.products.show');
     Route::get('/categories', [App\Http\Controllers\Api\CategoryController::class, 'index'])->name('api.categories');
+    Route::get('/brands', [App\Http\Controllers\Api\BrandController::class, 'index'])->name('api.brands');
+    Route::get('/classifiers', [App\Http\Controllers\Api\ClassifierController::class, 'index'])->name('api.classifiers');
     Route::get('/product/{id}', [MainController::class, 'product'])->name('api.product');
 
     Route::prefix('basket')->group(function () {
@@ -33,6 +36,9 @@ Route::prefix('api')->group(function () {
         Route::get('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show']);
         Route::apiResource('categories', App\Http\Controllers\Admin\CategoryController::class);
         Route::apiResource('products', App\Http\Controllers\Admin\ProductController::class);
+        Route::post('products/{product}/images', [App\Http\Controllers\Admin\ProductImageController::class, 'store']);
+        Route::put('products/{product}/images/reorder', [App\Http\Controllers\Admin\ProductImageController::class, 'reorder']);
+        Route::delete('products/{product}/images/{media}', [App\Http\Controllers\Admin\ProductImageController::class, 'destroy']);
     });
 });
 

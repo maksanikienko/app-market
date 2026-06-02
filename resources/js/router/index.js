@@ -11,7 +11,9 @@ import MainLayout from "@/components/layouts/MainLayout.vue";
 import AuthLayout from "@/components/layouts/AuthLayout.vue";
 import AdminLayout from "@/components/layouts/AdminLayout.vue";
 import AdminProducts from "@/components/pages/admin/AdminProducts.vue";
+import AdminProductForm from "@/components/pages/admin/AdminProductForm.vue";
 import AdminCategories from "@/components/pages/admin/AdminCategories.vue";
+import AdminCategoryForm from "@/components/pages/admin/AdminCategoryForm.vue";
 import AdminOrders from "@/components/pages/admin/AdminOrders.vue";
 import Cart from "@/components/pages/Cart.vue";
 
@@ -32,9 +34,13 @@ const routes = [
         component: AdminLayout,
         meta: { auth: true, role: 'admin' },
         children: [
-            { path: 'products',   component: AdminProducts },
-            { path: 'categories', component: AdminCategories },
-            { path: 'orders',     component: AdminOrders },
+            { path: 'products',             component: AdminProducts },
+            { path: 'products/create',      component: AdminProductForm },
+            { path: 'products/:id/edit',    component: AdminProductForm, props: true },
+            { path: 'categories',             component: AdminCategories },
+            { path: 'categories/create',     component: AdminCategoryForm },
+            { path: 'categories/:id/edit',   component: AdminCategoryForm, props: true },
+            { path: 'orders',               component: AdminOrders },
         ]
     },
     {

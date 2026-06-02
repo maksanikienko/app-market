@@ -1,0 +1,160 @@
+import { useLocaleStore } from '@/store/localeStore'
+
+const ui = {
+  // Navigation
+  'nav.home':     { ru: 'Главная',               ro: 'Acasă' },
+  'nav.products': { ru: 'Товары',                ro: 'Produse' },
+  'nav.login':    { ru: 'Войти',                 ro: 'Autentificare' },
+  'nav.register': { ru: 'Регистрация',            ro: 'Înregistrare' },
+  'nav.admin':    { ru: 'Панель администратора', ro: 'Panou admin' },
+  'nav.logout':   { ru: 'Выйти',                 ro: 'Ieșire' },
+
+  // Common
+  'common.free':    { ru: 'Бесплатно', ro: 'Gratuit' },
+  'common.yes':     { ru: 'Да',        ro: 'Da' },
+  'common.loading': { ru: 'Загрузка…', ro: 'Se încarcă…' },
+
+  // Home — Store title
+  'home.store.badge':   { ru: 'Коллекция 2025',                                       ro: 'Colecția 2025' },
+  'home.store.name':    { ru: 'Магазин верхней женской одежды',                        ro: 'Magazin de îmbrăcăminte caldă pentru femei' },
+  'home.store.tagline': { ru: 'Куртки, пальто, шубы и жилеты — всё для тепла и стиля', ro: 'Jachete, paltoane, blănuri și veste — tot pentru căldură și stil' },
+  'home.store.cta':     { ru: 'Смотреть каталог',                                      ro: 'Vezi catalogul' },
+
+  // Home — Hero
+  'home.hero.badge':    { ru: 'Новинки 2025',          ro: 'Noutăți 2025' },
+  'home.hero.title1':   { ru: 'Откройте для себя',     ro: 'Descoperă produse' },
+  'home.hero.title2':   { ru: 'товары, которые понравятся', ro: 'pe care le vei iubi' },
+  'home.hero.subtitle': { ru: 'Тысячи товаров по конкурентным ценам. Бесплатная доставка при заказе от $50.', ro: 'Mii de articole la prețuri competitive. Livrare gratuită la comenzi peste $50.' },
+  'home.hero.shop':     { ru: 'Купить сейчас',         ro: 'Cumpără acum' },
+  'home.hero.catalog':  { ru: 'Смотреть каталог',      ro: 'Vezi catalogul' },
+
+  // Home — Stats
+  'home.stats.products':  { ru: 'Товаров',         ro: 'Produse' },
+  'home.stats.customers': { ru: 'Клиентов',         ro: 'Clienți' },
+  'home.stats.rating':    { ru: 'Средний рейтинг',  ro: 'Rating mediu' },
+  'home.stats.support':   { ru: 'Поддержка',         ro: 'Suport' },
+
+  // Home — Categories
+  'home.cats.title':   { ru: 'По категориям', ro: 'Pe categorii' },
+  'home.cats.viewAll': { ru: 'Все',           ro: 'Vezi tot' },
+
+  // Home — New Arrivals
+  'home.arrivals.title':  { ru: 'Новинки',             ro: 'Noutăți' },
+  'home.arrivals.all':    { ru: 'Все товары →',         ro: 'Toate produsele →' },
+  'home.arrivals.seeAll': { ru: 'Смотреть все товары',  ro: 'Vezi toate produsele' },
+
+  // Home — Promo
+  'home.promo.ship.title': { ru: 'Бесплатная доставка',  ro: 'Livrare gratuită' },
+  'home.promo.ship.desc':  { ru: 'На все заказы от $50. Быстрая доставка за 2–3 рабочих дня.', ro: 'La toate comenzile peste $50. Livrare rapidă în 2–3 zile lucrătoare.' },
+  'home.promo.shop':       { ru: 'Купить',               ro: 'Cumpără' },
+  'home.promo.prot.title': { ru: 'Защита покупателя',    ro: 'Protecția cumpărătorului' },
+  'home.promo.prot.desc':  { ru: '30-дневный возврат. Полный возврат, если товар не соответствует описанию.', ro: 'Returnare ușoară în 30 de zile. Ramburs complet dacă articolul nu corespunde descrierii.' },
+  'home.promo.more':       { ru: 'Подробнее',            ro: 'Află mai mult' },
+
+  // Home — Newsletter
+  'home.news.title':     { ru: 'Будьте в курсе', ro: 'Fii la curent' },
+  'home.news.desc':      { ru: 'Подпишитесь, чтобы узнавать о новых товарах и эксклюзивных акциях.', ro: 'Abonează-te pentru a fi notificat despre produse noi și oferte exclusive.' },
+  'home.news.subscribe': { ru: 'Подписаться',    ro: 'Abonează-te' },
+  'home.news.thanks':    { ru: 'Спасибо! Вы подписались.', ro: 'Mulțumim! Ești abonat.' },
+
+  // Products page
+  'products.title':       { ru: 'Товары',           ro: 'Produse' },
+  'products.found':       { ru: 'товаров найдено',  ro: 'produse găsite' },
+  'products.search':      { ru: 'Поиск товаров...', ro: 'Caută produse...' },
+  'products.clearFilter': { ru: 'Сбросить фильтры', ro: 'Resetează filtrele' },
+  'products.perPage':     { ru: '/ стр.',            ro: '/ pag.' },
+  'products.empty.title': { ru: 'Товары не найдены', ro: 'Nu s-au găsit produse' },
+  'products.empty.hint':  { ru: 'Попробуйте изменить фильтры или поисковый запрос', ro: 'Încearcă să ajustezi filtrele sau interogarea de căutare' },
+  'products.page':        { ru: 'Страница',           ro: 'Pagina' },
+  'products.of':          { ru: 'из',                 ro: 'din' },
+
+  // Product detail
+  'product.badge.new':      { ru: 'Новинка',  ro: 'Nou' },
+  'product.badge.hit':      { ru: 'Хит',      ro: 'Hit' },
+  'product.badge.sale':     { ru: 'Скидка',   ro: 'Reducere' },
+  'product.qty':            { ru: 'Количество:', ro: 'Cantitate:' },
+  'product.addToCart':      { ru: 'В корзину',   ro: 'Adaugă în coș' },
+  'product.adding':         { ru: 'Добавляем...', ro: 'Se adaugă...' },
+  'product.added':          { ru: 'Добавлен',    ro: 'Adăugat' },
+  'product.spec.article':   { ru: 'Артикул',           ro: 'Articol' },
+  'product.spec.season':    { ru: 'Сезон',             ro: 'Sezon' },
+  'product.spec.length':    { ru: 'Длина',             ro: 'Lungime' },
+  'product.spec.outer':     { ru: 'Внешний материал',  ro: 'Material exterior' },
+  'product.spec.lining':    { ru: 'Подкладка',         ro: 'Căptușeală' },
+  'product.spec.filling':   { ru: 'Наполнитель',       ro: 'Umplutură' },
+  'product.spec.hood':      { ru: 'Капюшон',           ro: 'Glugă' },
+  'product.spec.hoodYes':   { ru: 'Есть',              ro: 'Da' },
+  'product.spec.hoodDetach':{ ru: 'Есть, съёмный',     ro: 'Da, detașabil' },
+  'product.spec.waterproof':{ ru: 'Водонепроницаемый', ro: 'Impermeabil' },
+  'product.spec.delivery':  { ru: 'Доставка',          ro: 'Livrare' },
+  'product.spec.days':      { ru: '2–3 дня',           ro: '2–3 zile' },
+  'product.notFound':       { ru: 'Товар не найден',   ro: 'Produsul nu a fost găsit' },
+  'product.backTo':         { ru: 'Назад к товарам',   ro: 'Înapoi la produse' },
+  'product.in_stock':       { ru: 'В наличии',         ro: 'În stoc' },
+  'product.pcs':            { ru: 'шт.',               ro: 'buc.' },
+  'product.choose_params':  { ru: 'Пожалуйста, выберите параметры',         ro: 'Vă rugăm să selectați opțiunile' },
+  'product.size':           { ru: 'Размер',            ro: 'Mărimea' },
+  'product.color':          { ru: 'Цвет',            ro: 'Culoare' },
+
+  // Cart
+  'cart.title':           { ru: 'Корзина',           ro: 'Coș de cumpărături' },
+  'cart.placed.title':    { ru: 'Заказ оформлен!',   ro: 'Comandă plasată!' },
+  'cart.continue':        { ru: 'Продолжить покупки', ro: 'Continuă cumpărăturile' },
+  'cart.summary':         { ru: 'Итого',             ro: 'Sumar' },
+  'cart.subtotal':        { ru: 'Подытог:',          ro: 'Subtotal:' },
+  'cart.shipping':        { ru: 'Доставка:',         ro: 'Livrare:' },
+  'cart.tax':             { ru: 'НДС (10%):',        ro: 'TVA (10%):' },
+  'cart.total':           { ru: 'Итого:',            ro: 'Total:' },
+  'cart.placeOrder':      { ru: 'Оформить заказ',    ro: 'Plasează comanda' },
+  'cart.promo':           { ru: 'Промокод',          ro: 'Cod promoțional' },
+  'cart.promoCode':       { ru: 'Код',               ro: 'Cod' },
+  'cart.apply':           { ru: 'Применить',         ro: 'Aplică' },
+  'cart.empty.title':     { ru: 'Корзина пуста',     ro: 'Coșul tău este gol' },
+  'cart.empty.hint':      { ru: 'Добавьте товары',   ro: 'Adaugă produse' },
+  'cart.empty.back':      { ru: 'К товарам',         ro: 'Înapoi la produse' },
+  'cart.dialog.title':    { ru: 'Подтвердить заказ', ro: 'Confirmă comanda' },
+  'cart.dialog.desc':     { ru: 'Оставьте контактные данные, чтобы мы могли с вами связаться (необязательно).', ro: 'Lasă datele de contact pentru a te putea contacta (opțional).' },
+  'cart.dialog.name':     { ru: 'Имя',               ro: 'Nume' },
+  'cart.dialog.namePh':   { ru: 'Ваше имя',          ro: 'Numele tău' },
+  'cart.dialog.phone':    { ru: 'Телефон',            ro: 'Telefon' },
+  'cart.dialog.items':    { ru: 'Товары:',            ro: 'Articole:' },
+  'cart.dialog.total':    { ru: 'Итого:',             ro: 'Total:' },
+  'cart.dialog.cancel':   { ru: 'Отмена',             ro: 'Anulează' },
+  'cart.dialog.placing':  { ru: 'Оформляем...',       ro: 'Se procesează...' },
+  'cart.dialog.confirm':  { ru: 'Подтвердить',        ro: 'Confirmă' },
+
+  // Aside filters
+  'filter.title':      { ru: 'Фильтры',            ro: 'Filtre' },
+  'filter.clearAll':   { ru: 'Сбросить',           ro: 'Resetează' },
+  'filter.price':      { ru: 'Цена (lei)',          ro: 'Preț (lei)' },
+  'filter.priceFrom':  { ru: 'От',                 ro: 'De la' },
+  'filter.priceTo':    { ru: 'До',                 ro: 'Până la' },
+  'filter.category':   { ru: 'Категория',          ro: 'Categorie' },
+  'filter.outer':      { ru: 'Материал',           ro: 'Material' },
+  'filter.lining':     { ru: 'Подкладка',          ro: 'Căptușeală' },
+  'filter.filling':    { ru: 'Наполнитель',        ro: 'Umplutură' },
+  'filter.season':     { ru: 'Сезон',              ro: 'Sezon' },
+  'filter.length':     { ru: 'Длина',              ro: 'Lungime' },
+  'filter.features':   { ru: 'Особенности',        ro: 'Caracteristici' },
+  'filter.hood':       { ru: 'Есть капюшон',       ro: 'Cu glugă' },
+  'filter.waterproof': { ru: 'Водонепроницаемый',  ro: 'Impermeabil' },
+  'filter.color':      { ru: 'Цвет',               ro: 'Culoare' },
+  'filter.size':       { ru: 'Размер',              ro: 'Mărime' },
+  'filter.apply':      { ru: 'Применить',           ro: 'Aplică' },
+  'filter.open':       { ru: 'Фильтры',             ro: 'Filtre' },
+
+  // ProductCard
+  'card.view':  { ru: 'Подробнее', ro: 'Detalii' },
+  'card.add':   { ru: 'В корзину', ro: 'În coș' },
+  'card.added': { ru: 'В корзине', ro: 'Adăugat' },
+}
+
+export function useI18n() {
+  const localeStore = useLocaleStore()
+  const t = (key) => {
+    const entry = ui[key]
+    if (!entry) return key
+    return localeStore.t(entry)
+  }
+  return { t }
+}

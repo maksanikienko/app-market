@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-stone-100">
     <Header />
 
     <div class="flex flex-1">
       <AsidePanel v-if="showAside" />
 
-      <main class="flex-1 container mx-auto px-4 py-6">
+      <main class="flex-1 min-w-0 max-w-screen-xl mx-auto px-6 py-8">
         <RouterView v-slot="{ Component, route: r }">
           <Transition :name="r.path === '/' ? 'fade' : 'slide'" mode="out-in">
             <component :is="Component" :key="r.path" />

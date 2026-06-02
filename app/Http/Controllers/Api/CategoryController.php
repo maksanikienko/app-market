@@ -3,17 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Services\CategoryService;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController
 {
-    private CategoryService $categoryService;
+    public function __construct(private CategoryService $categoryService) {}
 
-    public function __construct(CategoryService $categoryService){
-        $this->categoryService = $categoryService;
-    }
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(): JsonResponse
     {
-        return response()->json($this->categoryService->getCategories());
-    }
+        $categories = $this->categoryService->getCategories()->map(fn($c) => [
+            'id'          => $c->id,
+            'slug'        => $c->slug,
+            'name'        => $c->getTranslations('name'),
+            'description' => $c->getTranslations('description'),
+            'is_active'   => $c->is_active,
+            'sort_order'  => $c->sort_order,
+        ]);
 
+        return response()->json($categories);
+    }
 }

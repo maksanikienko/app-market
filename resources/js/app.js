@@ -1,11 +1,6 @@
 import './bootstrap.js';
 import '../css/app.css';
 
-import.meta.glob([
-    '../../public/storage/categories/**',
-    '../../public/storage/products/**',
-    '../../public/storage/**'
-]);
 import axios from 'axios';
 import { createApp } from 'vue';
 import { createPinia } from "pinia";

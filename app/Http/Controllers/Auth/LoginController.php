@@ -57,13 +57,4 @@ class LoginController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    protected function redirectTo()
-    {
-        if (Auth::user()->isAdmin()) {
-            return route('home');
-        } else {
-            return route('user.orders.index');
-        }
-    }
-
 }

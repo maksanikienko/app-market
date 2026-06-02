@@ -4,92 +4,35 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
-use App\Models\Category;
 use App\Models\Product;
 use App\Services\ProductService;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-    public ProductService $productService;
+    public function __construct(public ProductService $productService) {}
 
-    public function __construct(ProductService $productService) {
-//        $this->middleware('auth');
-        $this->productService = $productService;
-    }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): \Illuminate\Database\Eloquent\Collection
+    public function index(): JsonResponse
     {
-//        $products = Product::get();
-//        return view('auth.products.index', compact('products'));
-        return $this->productService->getProducts();
+        return response()->json($this->productService->getProducts());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(ProductRequest $request): JsonResponse
     {
-        $categories = Category::get();
-        return view('auth.products.form', compact('categories'));
+        $product = $this->productService->createProduct($request->validated());
+        return response()->json($product, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(ProductRequest $request)
+    public function update(ProductRequest $request, Product $product): JsonResponse
     {
-        $params = $request->all();
-        unset($params['image']);
-        if ($request->has('image')) {
-            $filename = $request->file('image')->getClientOriginalName();
-            $params['image'] = $request->file('image')->storeAs('products', $filename);
-        }
-        Product::create($params);
-        return redirect()->route('products.index');
+        return response()->json(
+            $this->productService->updateProduct($product, $request->except('_method'))
+        );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
+    public function destroy(Product $product): JsonResponse
     {
-        return view('auth.products.show', compact('product'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        $categories = Category::get();
-        return view('auth.products.form', compact('product', 'categories'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(ProductRequest $request, Product $product)
-    {
-        $params = $request->all();
-        unset($params['image']);
-        if ($request->has('image')) {
-            Storage::delete($product->image);
-            $filename = $request->file('image')->getClientOriginalName();
-            $params['image'] = $request->file('image')->storeAs('products', $filename);
-        }
-        $product->update($params);
-        return redirect()->route('products.index');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
-    {
-        $product->delete();
-        return redirect()->route('products.index');
+        $this->productService->deleteProduct($product);
+        return response()->json(null, 204);
     }
 }

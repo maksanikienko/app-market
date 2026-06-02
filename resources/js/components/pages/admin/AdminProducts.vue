@@ -1,7 +1,8 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Products</h1>
+      <h1 class="text-2xl font-semibold">Товары</h1>
+      <Button @click="router.push('/admin/products/create')">+ Новый товар</Button>
     </div>
 
     <Card>
@@ -9,83 +10,119 @@
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Code</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead class="w-12">ID</TableHead>
+              <TableHead class="w-16">Фото</TableHead>
+              <TableHead>Название</TableHead>
+              <TableHead>Код</TableHead>
+              <TableHead>Цена</TableHead>
+              <TableHead>Категория</TableHead>
+              <TableHead class="w-36">Действия</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             <TableRow v-for="product in products" :key="product.id">
-              <TableCell>{{ product.id }}</TableCell>
+              <TableCell class="text-muted-foreground">{{ product.id }}</TableCell>
 
               <TableCell>
                 <img
-                  v-if="product.image"
-                  :src="`/storage/${product.image}`"
-                  class="w-14 h-14 object-cover rounded"
+                  v-if="product.media_items?.[0]"
+                  :src="product.media_items[0].thumb_url"
+                  class="w-12 h-12 object-cover rounded"
                 />
               </TableCell>
 
-              <TableCell>{{ product.name }}</TableCell>
-
+              <TableCell class="font-medium">{{ localeStore.t(product.name) }}</TableCell>
               <TableCell>{{ product.code }}</TableCell>
-
               <TableCell>{{ product.price }}</TableCell>
+              <TableCell>{{ localeStore.t(product.category?.name ?? '—') }}</TableCell>
 
               <TableCell>
-                {{ product.category?.name ?? '-' }}
+                <div class="flex gap-1">
+                  <Button size="sm" variant="outline" @click="router.push(`/admin/products/${product.id}/edit`)">
+                    Изменить
+                  </Button>
+                  <Button
+                    size="sm"
+                    :disabled="deletingId === product.id"
+                    class="bg-red-400 hover:bg-red-600/50"
+                    @click="deleteTarget = product"
+                  >
+                    Удалить
+                  </Button>
+                </div>
               </TableCell>
-
-              <TableCell class="max-w-xs truncate">
-                {{ product.description }}
-              </TableCell>
-
-              <TableCell>{{ product.created_at ?? '-' }}</TableCell>
-
-              <TableCell>{{ product.updated_at }}</TableCell>
             </TableRow>
 
             <TableRow v-if="!loading && !products.length">
-              <TableCell colspan="9" class="text-center py-6 text-muted-foreground">
-                Products not found
+              <TableCell colspan="7" class="text-center py-8 text-muted-foreground">
+                Товары не найдены
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </CardContent>
     </Card>
+
+    <AlertDialog :open="!!deleteTarget" @update:open="val => { if (!val) deleteTarget = null }">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Удалить товар?</AlertDialogTitle>
+          <AlertDialogDescription>
+            «{{ deleteTarget?.name }}» будет удалён безвозвратно. Это действие нельзя отменить.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <Button variant="outline" @click="deleteTarget = null">Отмена</Button>
+          <Button class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="confirmDelete">
+            Удалить
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import axios from 'axios'
-import {Card, CardContent} from "./../../ui/card";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "./../../ui/table";
+import { useRouter } from 'vue-router'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  AlertDialog, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useAdminProductService } from '@/services/adminProductService'
+import {useLocaleStore} from "@/store/localeStore.js";
+
+const localeStore = useLocaleStore()
+
+const router = useRouter()
+const { getAll, remove } = useAdminProductService()
 
 const products = ref([])
 const loading = ref(false)
+const deletingId = ref(null)
+const deleteTarget = ref(null)
 
-const getProducts = async () => {
+const load = async () => {
+  loading.value = true
+  try { products.value = await getAll() }
+  finally { loading.value = false }
+}
+
+const confirmDelete = async () => {
+  const product = deleteTarget.value
+  deleteTarget.value = null
+  deletingId.value = product.id
   try {
-    const { data } = await axios.get('/api/admin/products')
-    products.value = data
-  } catch (e) {
-    console.error('Failed to load products', e)
+    await remove(product.id)
+    products.value = products.value.filter(p => p.id !== product.id)
   } finally {
-    loading.value = false
+    deletingId.value = null
   }
 }
-onMounted(async () => {
-  loading.value = true
-  await getProducts()
-})
-</script>
 
+onMounted(load)
+</script>

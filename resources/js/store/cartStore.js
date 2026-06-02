@@ -13,8 +13,8 @@ export const useCartStore = defineStore('cart', () => {
         items.value = await CartService.fetchBasket();
     };
 
-    const add = async (productId) => {
-        items.value = await CartService.add(productId);
+    const add = async (productId, variantData = {}) => {
+        items.value = await CartService.add(productId, variantData);
     };
 
     const remove = async (productId) => {

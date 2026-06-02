@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-8">
-    <h1 class="text-3xl font-bold">Shopping Cart</h1>
+    <h1 class="text-3xl font-bold">{{ t('cart.title') }}</h1>
 
     <!-- ── Success screen ──────────────────────────────────────────── -->
     <div v-if="orderPlaced" class="flex flex-col items-center justify-center gap-6 py-20 rounded-2xl border bg-muted/30">
@@ -8,13 +8,11 @@
         <CheckCircle class="h-10 w-10 text-emerald-600" />
       </div>
       <div class="text-center space-y-1">
-        <h2 class="text-2xl font-bold">Order Placed!</h2>
-        <p class="text-muted-foreground">
-          Order #{{ placedOrderId }} was successfully placed. We'll contact you shortly.
-        </p>
+        <h2 class="text-2xl font-bold">{{ t('cart.placed.title') }}</h2>
+        <p class="text-muted-foreground">{{ orderSuccessMsg }}</p>
       </div>
       <RouterLink to="/products">
-        <Button size="lg">Continue Shopping</Button>
+        <Button size="lg">{{ t('cart.continue') }}</Button>
       </RouterLink>
     </div>
 
@@ -33,46 +31,45 @@
       </div>
 
       <!-- Summary -->
-      <div class="h-fit rounded-lg border p-6 space-y-4 sticky top-20">
-        <h2 class="font-semibold text-lg">Summary</h2>
+      <div class="h-fit rounded-lg border p-6 space-y-4 sticky top-20 bg-white">
+        <h2 class="font-semibold text-lg">{{ t('cart.summary') }}</h2>
 
         <div class="space-y-2 text-sm border-b pb-4">
           <div class="flex justify-between">
-            <span class="text-muted-foreground">Subtotal:</span>
-            <span>${{ subtotal.toFixed(2) }}</span>
+            <span class="text-muted-foreground">{{ t('cart.subtotal') }}</span>
+            <span>{{ subtotal.toFixed(2) }} lei</span>
           </div>
+<!--          <div class="flex justify-between">-->
+<!--            <span class="text-muted-foreground">{{ t('cart.shipping') }}</span>-->
+<!--            <span>{{ shipping === 0 ? t('common.free') : `${shipping.toFixed(2)} lei` }}</span>-->
+<!--          </div>-->
           <div class="flex justify-between">
-            <span class="text-muted-foreground">Shipping:</span>
-            <span>{{ shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}` }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-muted-foreground">Tax (10%):</span>
-            <span>${{ tax.toFixed(2) }}</span>
+            <span class="text-muted-foreground">{{ t('cart.tax') }}</span>
+            <span>{{ tax.toFixed(2) }} lei</span>
           </div>
         </div>
 
         <div class="flex justify-between text-lg font-bold">
-          <span>Total:</span>
-          <span>${{ total.toFixed(2) }}</span>
+          <span>{{ t('cart.total') }}</span>
+          <span>{{ total.toFixed(2) }} lei</span>
         </div>
 
-        <!-- Place Order — opens dialog -->
         <Button class="w-full" @click="dialogOpen = true">
-          Place Order
+          {{ t('cart.placeOrder') }}
         </Button>
         <Button variant="outline" class="w-full" as-child>
-          <RouterLink to="/products">Continue Shopping</RouterLink>
+          <RouterLink to="/products">{{ t('cart.continue') }}</RouterLink>
         </Button>
 
-        <Separator />
+<!--        <Separator />-->
 
-        <div class="space-y-2">
-          <Label for="promo">Promo Code</Label>
-          <div class="flex gap-2">
-            <Input id="promo" placeholder="Code" v-model="promoCode" />
-            <Button variant="outline" @click="applyPromo">Apply</Button>
-          </div>
-        </div>
+<!--        <div class="space-y-2">-->
+<!--          <Label for="promo">{{ t('cart.promo') }}</Label>-->
+<!--          <div class="flex gap-2">-->
+<!--            <Input id="promo" :placeholder="t('cart.promoCode')" v-model="promoCode" />-->
+<!--            <Button variant="outline" @click="applyPromo">{{ t('cart.apply') }}</Button>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </div>
 
@@ -81,11 +78,11 @@
       <div class="text-center space-y-4">
         <ShoppingCart class="h-16 w-16 mx-auto text-muted-foreground" />
         <div>
-          <p class="text-lg font-semibold">Your cart is empty</p>
-          <p class="text-muted-foreground">Add some products</p>
+          <p class="text-lg font-semibold">{{ t('cart.empty.title') }}</p>
+          <p class="text-muted-foreground">{{ t('cart.empty.hint') }}</p>
         </div>
         <Button as-child>
-          <RouterLink to="/products">Back to Products</RouterLink>
+          <RouterLink to="/products">{{ t('cart.empty.back') }}</RouterLink>
         </Button>
       </div>
     </div>
@@ -94,40 +91,37 @@
     <Dialog v-model:open="dialogOpen">
       <DialogContent class="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Confirm Order</DialogTitle>
-          <DialogDescription>
-            Leave your contact details so we can reach you (optional).
-          </DialogDescription>
+          <DialogTitle>{{ t('cart.dialog.title') }}</DialogTitle>
+          <DialogDescription>{{ t('cart.dialog.desc') }}</DialogDescription>
         </DialogHeader>
 
         <div class="space-y-4 py-2">
           <div class="space-y-1">
-            <Label for="order-name">Name</Label>
-            <Input id="order-name" v-model="orderForm.name" placeholder="Your name" :disabled="placing" />
+            <Label for="order-name">{{ t('cart.dialog.name') }}</Label>
+            <Input id="order-name" v-model="orderForm.name" :placeholder="t('cart.dialog.namePh')" :disabled="placing" />
           </div>
           <div class="space-y-1">
-            <Label for="order-phone">Phone</Label>
-            <Input id="order-phone" v-model="orderForm.phone" placeholder="+1 234 567 8900" :disabled="placing" />
+            <Label for="order-phone">{{ t('cart.dialog.phone') }}</Label>
+            <Input id="order-phone" v-model="orderForm.phone" placeholder="+373 60 000 000" :disabled="placing" />
           </div>
 
           <p v-if="placeError" class="text-sm text-destructive">{{ placeError }}</p>
 
-          <!-- Order summary inside dialog -->
           <div class="rounded-lg bg-muted/40 p-4 space-y-1 text-sm">
             <div class="flex justify-between text-muted-foreground">
-              <span>Items:</span><span>{{ cartStore.count }}</span>
+              <span>{{ t('cart.dialog.items') }}</span><span>{{ cartStore.count }}</span>
             </div>
             <div class="flex justify-between font-semibold">
-              <span>Total:</span><span>${{ total.toFixed(2) }}</span>
+              <span>{{ t('cart.dialog.total') }}</span><span>{{ total.toFixed(2) }} lei</span>
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" @click="dialogOpen = false" :disabled="placing">Cancel</Button>
+          <Button variant="outline" @click="dialogOpen = false" :disabled="placing">{{ t('cart.dialog.cancel') }}</Button>
           <Button @click="confirmOrder" :disabled="placing">
             <Loader2 v-if="placing" class="h-4 w-4 mr-2 animate-spin" />
-            {{ placing ? 'Placing...' : 'Confirm Order' }}
+            {{ placing ? t('cart.dialog.placing') : t('cart.dialog.confirm') }}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -151,21 +145,21 @@ import {
 } from '@/components/ui/dialog';
 import CartItem from '@/components/parts/CartItem.vue';
 import { ShoppingCart, CheckCircle, Loader2 } from 'lucide-vue-next';
+import { useLocaleStore } from '@/store/localeStore';
+import { useI18n } from '@/i18n';
 
-const cartStore = useCartStore();
-const promoCode = ref('');
+const cartStore   = useCartStore();
+const localeStore = useLocaleStore();
+const { t }       = useI18n();
+const promoCode   = ref('');
 
-// Dialog state
-const dialogOpen   = ref(false);
-const placing      = ref(false);
-const placeError   = ref('');
-const orderForm    = ref({ name: '', phone: '' });
-
-// Success state
-const orderPlaced  = ref(false);
+const dialogOpen    = ref(false);
+const placing       = ref(false);
+const placeError    = ref('');
+const orderForm     = ref({ name: '', phone: '' });
+const orderPlaced   = ref(false);
 const placedOrderId = ref(null);
 
-// ── Totals ────────────────────────────────────────────────────────────────────
 const subtotal = computed(() =>
     cartStore.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );
@@ -173,26 +167,24 @@ const shipping = computed(() => subtotal.value > 50 ? 0 : 10);
 const tax      = computed(() => subtotal.value * 0.1);
 const total    = computed(() => subtotal.value + shipping.value + tax.value);
 
-// ── Cart actions ──────────────────────────────────────────────────────────────
+const orderSuccessMsg = computed(() =>
+  localeStore.current === 'ru'
+    ? `Заказ #${placedOrderId.value} успешно оформлен. Мы свяжемся с вами в ближайшее время.`
+    : `Comanda #${placedOrderId.value} a fost plasată cu succes. Vă vom contacta în curând.`
+);
+
 const removeFromCart = async (productId) => {
-  try {
-    await cartStore.remove(productId);
-  } catch (e) {
-    console.error('Failed to remove product', e);
-  }
+  try { await cartStore.remove(productId); }
+  catch (e) { console.error('Failed to remove product', e); }
 };
 
 const updateQuantity = async (productId, quantity) => {
-  try {
-    await cartStore.updateQuantity(productId, quantity);
-  } catch (e) {
-    console.error('Failed to update quantity', e);
-  }
+  try { await cartStore.updateQuantity(productId, quantity); }
+  catch (e) { console.error('Failed to update quantity', e); }
 };
 
-// ── Place order ───────────────────────────────────────────────────────────────
 const confirmOrder = async () => {
-  placing.value   = true;
+  placing.value    = true;
   placeError.value = '';
 
   try {
@@ -202,8 +194,7 @@ const confirmOrder = async () => {
     });
 
     if (result.success) {
-      // Clear local cart state
-      cartStore.items = [];
+      cartStore.items     = [];
       placedOrderId.value = result.order_id;
       dialogOpen.value    = false;
       orderPlaced.value   = true;

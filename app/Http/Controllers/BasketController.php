@@ -29,7 +29,7 @@ class BasketController extends Controller
         }
     }
 
-    public function add($productId): JsonResponse
+    public function add(Request $request, $productId): JsonResponse
     {
         try {
             $orderId = session('orderId');
@@ -41,12 +41,19 @@ class BasketController extends Controller
                 $order = Order::findOrFail($orderId);
             }
 
+            $variantData = array_filter(
+                $request->only(['variant_id', 'color', 'color_hex', 'size']),
+                fn($v) => $v !== null && $v !== ''
+            );
+
             if ($order->products->contains($productId)) {
                 $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
-                $pivotRow->count++;
-                $pivotRow->update();
+                $order->products()->updateExistingPivot($productId, array_merge(
+                    ['count' => $pivotRow->count + 1],
+                    $variantData
+                ));
             } else {
-                $order->products()->attach($productId);
+                $order->products()->attach($productId, array_merge(['count' => 1], $variantData));
             }
 
             if (Auth::check()) {

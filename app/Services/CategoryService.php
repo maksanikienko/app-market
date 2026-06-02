@@ -15,4 +15,24 @@ class CategoryService
     {
         return $this->categoryRepository->getCategories();
     }
+
+    public function getCategoryById(int $id): ?\App\Models\Category
+    {
+        return $this->categoryRepository->findById($id);
+    }
+
+    public function createCategory(array $data): \App\Models\Category
+    {
+        return $this->categoryRepository->create($data);
+    }
+
+    public function updateCategory(\App\Models\Category $category, array $data): \App\Models\Category
+    {
+        return $this->categoryRepository->update($category, $data);
+    }
+
+    public function deleteCategory(\App\Models\Category $category): void
+    {
+        $this->categoryRepository->delete($category);
+    }
 }

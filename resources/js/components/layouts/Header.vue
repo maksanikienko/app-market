@@ -1,54 +1,71 @@
 <template>
-  <header class="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-    <div class="container mx-auto flex h-14 items-center justify-between px-4">
-<!--      <RouterLink to="/" class="flex items-center gap-2 font-semibold">-->
-<!--        <div class="h-6 w-6 rounded bg-primary"></div>-->
-<!--        <span class="hidden sm:inline">Store</span>-->
-<!--      </RouterLink>-->
+  <header class="sticky top-0 z-50 bg-stone-100 border-b border-stone-200">
+    <div class="max-w-screen-xl mx-auto px-6 flex h-16 items-center justify-between">
 
-      <nav class="hidden md:flex gap-6">
-        <RouterLink to="/" class="text-sm hover:text-primary transition-colors">Home</RouterLink>
-        <RouterLink to="/products" class="text-sm hover:text-primary transition-colors">Products</RouterLink>
+      <!-- Logo -->
+      <RouterLink to="/" class="text-base font-semibold tracking-[0.15em] uppercase text-stone-900 hover:text-stone-600 transition-colors">
+        foryou
+      </RouterLink>
+
+      <!-- Nav -->
+      <nav class="hidden md:flex gap-8">
+        <RouterLink
+          to="/"
+          class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
+          :class="{ 'text-stone-900 font-medium': $route.path === '/' }"
+        >{{ t('nav.home') }}</RouterLink>
+        <RouterLink
+          to="/products"
+          class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
+          :class="{ 'text-stone-900 font-medium': $route.path === '/products' }"
+        >{{ t('nav.products') }}</RouterLink>
       </nav>
 
-      <div class="flex items-center gap-2">
-        <Button variant="ghost" size="icon">
-          <Search class="h-4 w-4" />
-        </Button>
+      <!-- Actions -->
+      <div class="flex items-center gap-1">
 
-        <RouterLink to="/cart" class="relative">
-          <Button variant="ghost" size="icon">
-            <ShoppingCart class="h-4 w-4" />
-          </Button>
-          <Badge v-if="cartStore.count > 0" class="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center">
-            {{ cartStore.count }}
-          </Badge>
-        </RouterLink>
-
-        <div v-if="user" class="hidden text-sm md:block mr-2 text-muted-foreground">
-          {{ user.email || user.name }}
+        <!-- Language switcher -->
+        <div class="flex items-center text-[11px] font-medium tracking-wider mr-2 border border-stone-200 rounded-md overflow-hidden">
+          <button
+            @click="localeStore.setLocale('ru')"
+            :class="['px-2.5 py-1.5 transition-colors', localeStore.current === 'ru' ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-50']"
+          >RU</button>
+          <button
+            @click="localeStore.setLocale('ro')"
+            :class="['px-2.5 py-1.5 transition-colors border-l border-stone-200', localeStore.current === 'ro' ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-50']"
+          >RO</button>
         </div>
 
+        <!-- Cart -->
+        <RouterLink to="/cart" class="relative p-2 rounded-lg hover:bg-stone-100 transition-colors">
+          <ShoppingCart class="h-5 w-5 text-stone-700" />
+          <span
+            v-if="cartStore.count > 0"
+            class="absolute top-0.5 right-0.5 h-4 w-4 bg-stone-900 text-white text-[9px] rounded-full flex items-center justify-center font-semibold leading-none"
+          >{{ cartStore.count }}</span>
+        </RouterLink>
+
+        <!-- User -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button variant="ghost" size="icon">
-              <User class="h-4 w-4" />
-            </Button>
+            <button class="p-2 rounded-lg hover:bg-stone-100 transition-colors">
+              <User class="h-5 w-5 text-stone-700" />
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem v-if="!user" @click="navigateTo('/login')">Log in</DropdownMenuItem>
-            <DropdownMenuItem v-if="!user" @click="navigateTo('/register')">Register</DropdownMenuItem>
-            <DropdownMenuSeparator v-if="!user" />
-            <DropdownMenuItem v-if="user" @click="navigateTo('/profile')">
-              <span class="font-medium">{{ user.name || user.email }}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem v-if="userStore.isAdmin" @click="navigateTo('/admin/orders')">
-              Admin panel
+          <DropdownMenuContent align="end" class="w-48">
+            <div v-if="user" class="px-3 py-2 border-b border-stone-100">
+              <p class="text-xs text-stone-500 truncate">{{ user.email || user.name }}</p>
+            </div>
+            <DropdownMenuItem v-if="!user" @click="navigateTo('/login')">{{ t('nav.login') }}</DropdownMenuItem>
+            <DropdownMenuItem v-if="!user" @click="navigateTo('/register')">{{ t('nav.register') }}</DropdownMenuItem>
+            <DropdownMenuItem v-if="userStore.isAdmin" @click="navigateTo('/admin/orders')" class="text-stone-600">
+              {{ t('nav.admin') }}
             </DropdownMenuItem>
             <DropdownMenuSeparator v-if="user" />
-            <DropdownMenuItem v-if="user" @click="handleLogout">Exit</DropdownMenuItem>
+            <DropdownMenuItem v-if="user" @click="handleLogout" class="text-stone-500">{{ t('nav.logout') }}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
       </div>
     </div>
   </header>
@@ -58,23 +75,21 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from './../../store/userStore.js';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useLocaleStore } from './../../store/localeStore.js';
+import { useI18n } from '@/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Search, ShoppingCart, User } from 'lucide-vue-next';
-import {useCartStore} from "./../../store/cartStore.js";
+import { ShoppingCart, User } from 'lucide-vue-next';
+import { useCartStore } from './../../store/cartStore.js';
 
 const router = useRouter();
 const userStore = useUserStore();
+const localeStore = useLocaleStore();
+const { t } = useI18n();
 const user = computed(() => userStore.user);
-
 const cartStore = useCartStore();
 cartStore.fetchCart();
 
-const navigateTo = (path) => {
-  router.push(path);
-};
-
+const navigateTo = (path) => router.push(path);
 const handleLogout = async () => {
   await userStore.logout();
   await router.push('/login');
