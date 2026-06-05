@@ -2,56 +2,63 @@
   <div class="space-y-6">
 
     <!-- Page header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="text-2xl font-semibold tracking-tight text-stone-900">{{ t('products.title') }}</h1>
         <p v-if="!loading" class="text-xs text-stone-400 mt-0.5">{{ meta.total }} {{ t('products.found') }}</p>
       </div>
 
-      <div class="flex items-center gap-3">
-        <!-- Mobile filter button -->
-        <button
-          @click="filterStore.openMobileFilter()"
-          class="md:hidden flex items-center gap-1.5 h-9 px-3 text-xs font-medium border border-stone-200 rounded-lg text-stone-600 hover:bg-stone-100 transition-colors"
-        >
-          <SlidersHorizontal class="h-3.5 w-3.5" />
-          {{ t('filter.open') }}
-          <span v-if="filterStore.hasAnyFilter" class="ml-0.5 h-4 w-4 bg-stone-900 text-white text-[9px] rounded-full flex items-center justify-center font-semibold">
-            {{ activeFilterCount }}
-          </span>
-        </button>
-
-        <!-- Search -->
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <!-- Search — full width on mobile -->
         <div class="relative">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400 pointer-events-none" />
           <input
             v-model="searchQuery"
             :placeholder="t('products.search')"
-            class="h-9 pl-9 pr-3 w-56 text-sm rounded-lg border border-stone-200 bg-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors"
+            class="h-9 pl-9 pr-3 w-full sm:w-56 text-sm rounded-lg border border-stone-200 bg-white placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors"
           />
         </div>
 
-        <!-- Per page -->
-        <Select v-model="perPage" @update:model-value="goToPage(1)">
-          <SelectTrigger class="h-9 w-20 text-sm border-stone-200">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="12">12</SelectItem>
-            <SelectItem value="24">24</SelectItem>
-            <SelectItem value="48">48</SelectItem>
-          </SelectContent>
-        </Select>
+        <!-- Secondary controls: filter + per-page + clear -->
+        <div class="flex items-center gap-2">
+          <!-- Mobile filter button -->
+          <Button
+            variant="outline"
+            size="sm"
+            @click="filterStore.openMobileFilter()"
+            class="md:hidden h-9 px-3 text-xs font-medium border-stone-200 text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+          >
+            <SlidersHorizontal class="h-3.5 w-3.5" />
+            {{ t('filter.open') }}
+            <span v-if="filterStore.hasAnyFilter" class="h-4 w-4 bg-stone-900 text-white text-[9px] rounded-full flex items-center justify-center font-semibold leading-none">
+              {{ activeFilterCount }}
+            </span>
+          </Button>
 
-        <!-- Clear filters -->
-        <button
-          v-if="filterStore.hasAnyFilter"
-          @click="clearFilters"
-          class="flex items-center gap-1.5 h-9 px-3 text-xs text-stone-500 hover:text-red-500 border border-stone-200 rounded-lg transition-colors"
-        >
-          <X class="h-3.5 w-3.5" />
-          {{ t('products.clearFilter') }}
-        </button>
+          <!-- Per page -->
+          <Select v-model="perPage" @update:model-value="goToPage(1)">
+            <SelectTrigger class="h-9 w-20 text-sm border-stone-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="12">12</SelectItem>
+              <SelectItem value="24">24</SelectItem>
+              <SelectItem value="48">48</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <!-- Clear filters — pushed to the right on mobile -->
+          <Button
+            v-if="filterStore.hasAnyFilter"
+            variant="ghost"
+            size="sm"
+            @click="clearFilters"
+            class="ml-auto sm:ml-0 h-9 px-3 text-xs text-stone-500 hover:text-red-500 hover:bg-red-50"
+          >
+            <X class="h-3.5 w-3.5" />
+            {{ t('products.clearFilter') }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -144,6 +151,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDebounceFn } from '@vueuse/core';
+import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import ProductCard from '@/components/parts/ProductCard.vue';
 import { ShoppingBag, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, SlidersHorizontal } from 'lucide-vue-next';
