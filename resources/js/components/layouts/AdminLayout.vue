@@ -19,6 +19,12 @@
         <Button size="sm" variant="outline" @click="$router.push('/admin/orders')">
           Заказы
         </Button>
+        <Button size="sm" variant="outline" @click="$router.push('/admin/stock')">
+          Склад
+        </Button>
+        <Button size="sm" variant="outline" @click="$router.push('/admin/errors')">
+          Ошибки
+        </Button>
       </div>
 
       <router-view />

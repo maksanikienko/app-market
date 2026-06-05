@@ -4,10 +4,33 @@ const ui = {
   // Navigation
   'nav.home':     { ru: 'Главная',               ro: 'Acasă' },
   'nav.products': { ru: 'Товары',                ro: 'Produse' },
+  'nav.contact':  { ru: 'Контакты',              ro: 'Contact' },
   'nav.login':    { ru: 'Войти',                 ro: 'Autentificare' },
   'nav.register': { ru: 'Регистрация',            ro: 'Înregistrare' },
   'nav.admin':    { ru: 'Панель администратора', ro: 'Panou admin' },
   'nav.logout':   { ru: 'Выйти',                 ro: 'Ieșire' },
+
+  // Contact page
+  'contact.title':    { ru: 'Контакты',                                          ro: 'Contacte' },
+  'contact.subtitle': { ru: 'Мы всегда рады помочь. Свяжитесь с нами удобным способом.', ro: 'Suntem bucuroși să vă ajutăm. Contactați-ne prin orice mijloc convenabil.' },
+
+  'contact.address.label': { ru: 'Адрес',          ro: 'Adresă' },
+  'contact.address.value': { ru: 'ул. Примерная, 1, Кишинёв, Молдова', ro: 'str. Exemplu, 1, Chișinău, Moldova' },
+
+  'contact.phone.label': { ru: 'Телефон',           ro: 'Telefon' },
+  'contact.phone.value': { ru: '+373 00 000 000',   ro: '+373 00 000 000' },
+
+  'contact.email.label': { ru: 'Email',             ro: 'Email' },
+  'contact.email.value': { ru: 'contact@foryou.md', ro: 'contact@foryou.md' },
+
+  'contact.hours.label':    { ru: 'Режим работы',           ro: 'Program de lucru' },
+  'contact.hours.weekdays': { ru: 'Пн–Пт: 09:00 – 18:00',  ro: 'Lun–Vin: 09:00 – 18:00' },
+  'contact.hours.weekend':  { ru: 'Сб: 10:00 – 15:00',     ro: 'Sâm: 10:00 – 15:00' },
+
+  'contact.directions.title': { ru: 'Как нас найти', ro: 'Cum ne găsiți' },
+  'contact.directions.desc':  { ru: 'Мы находимся в центре города. Ближайшая остановка — «Площадь Великого Национального Собрания». Есть парковка рядом с магазином.', ro: 'Suntem situați în centrul orașului. Cea mai apropiată stație este «Piața Marii Adunări Naționale». Există parcare în apropierea magazinului.' },
+
+  'contact.map.noKey': { ru: 'Карта недоступна. Укажите VITE_GOOGLE_MAPS_KEY в .env', ro: 'Harta nu este disponibilă. Setați VITE_GOOGLE_MAPS_KEY în .env' },
 
   // Common
   'common.free':    { ru: 'Бесплатно', ro: 'Gratuit' },

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -11,7 +12,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Product extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasTranslations;
+    use HasFactory, InteractsWithMedia, HasTranslations, SoftDeletes;
 
     public array $translatable = ['name', 'description', 'short_description'];
 
@@ -88,11 +89,11 @@ class Product extends Model implements HasMedia
         return $arr;
     }
 
-    public function getPriceForCount(): float|int
-    {
-        if (!is_null($this->pivot)) {
-            return $this->pivot->count * $this->price;
-        }
-        return $this->price;
-    }
+//    public function getPriceForCount(): float|int
+//    {
+//        if (!is_null($this->pivot)) {
+//            return $this->pivot->count * $this->price;
+//        }
+//        return $this->price;
+//    }
 }

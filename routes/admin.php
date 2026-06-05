@@ -10,9 +10,9 @@ Route::group([
     'prefix' => 'admin',
 ], function () {
     Route::group(['middleware' => 'is_admin'], function () {
-        Route::get('/orders', [OrderController::class, 'index'])->name('home');
-        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+//        Route::get('/orders', [OrderController::class, 'index'])->name('home');
+//        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     });
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
+//    Route::resource('categories', CategoryController::class);
+//    Route::resource('products', ProductController::class);
 });

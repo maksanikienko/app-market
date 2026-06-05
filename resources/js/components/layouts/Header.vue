@@ -19,6 +19,11 @@
           class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
           :class="{ 'text-stone-900 font-medium': $route.path === '/products' }"
         >{{ t('nav.products') }}</RouterLink>
+        <RouterLink
+          to="/contact"
+          class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
+          :class="{ 'text-stone-900 font-medium': $route.path === '/contact' }"
+        >{{ t('nav.contact') }}</RouterLink>
       </nav>
 
       <!-- Actions -->

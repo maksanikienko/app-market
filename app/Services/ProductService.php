@@ -14,6 +14,11 @@ class ProductService
         return $this->productRepository->getProducts();
     }
 
+    public function getAdminProducts(array $filters = []): LengthAwarePaginator
+    {
+        return $this->productRepository->getAdminFiltered($filters);
+    }
+
     public function getPaginatedProducts(
         int     $perPage        = 12,
         ?string $search         = null,
@@ -60,7 +65,7 @@ class ProductService
         if (!empty($variants)) {
             $product->variants()->createMany($variants);
         }
-        return $product->load(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants']);
+        return $product->load(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
     }
 
     public function updateProduct(\App\Models\Product $product, array $data): \App\Models\Product
@@ -74,11 +79,21 @@ class ProductService
                 $product->variants()->createMany($variants);
             }
         }
-        return $product->fresh(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants']);
+        return $product->fresh(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
     }
 
     public function deleteProduct(\App\Models\Product $product): void
     {
         $this->productRepository->delete($product);
+    }
+
+    public function restoreProduct(int $id): void
+    {
+        $this->productRepository->restore($id);
+    }
+
+    public function forceDeleteProduct(int $id): void
+    {
+        $this->productRepository->forceDelete($id);
     }
 }

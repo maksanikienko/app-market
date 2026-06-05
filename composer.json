@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "mobiledetect/mobiledetectlib": "^4.8",
+        "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-medialibrary": "^11.23",
         "spatie/laravel-permission": "^6.25",
         "spatie/laravel-translatable": "^6.14"

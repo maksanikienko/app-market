@@ -11,12 +11,44 @@ class ProductRepository
 {
     private function withRelations()
     {
-        return Product::with(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants']);
+        return Product::with(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
     }
 
     public function getProducts(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->withRelations()->get();
+    }
+
+    public function getAdminFiltered(array $filters = []): LengthAwarePaginator
+    {
+        $query = !empty($filters['trashed'])
+            ? $this->withRelations()->onlyTrashed()
+            : $this->withRelations();
+
+        if (!empty($filters['code'])) {
+            $query->where('code', 'like', "%{$filters['code']}%");
+        }
+        if (!empty($filters['name'])) {
+            $like = "%{$filters['name']}%";
+            $query->where(function ($q) use ($like) {
+                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ro')) LIKE ?", [$like])
+                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ru')) LIKE ?", [$like]);
+            });
+        }
+        if (!empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+        if (array_key_exists('is_new', $filters) && $filters['is_new'] !== null) {
+            $query->where('is_new', $filters['is_new']);
+        }
+        if (array_key_exists('is_hit', $filters) && $filters['is_hit'] !== null) {
+            $query->where('is_hit', $filters['is_hit']);
+        }
+        if (array_key_exists('is_sale', $filters) && $filters['is_sale'] !== null) {
+            $query->where('is_sale', $filters['is_sale']);
+        }
+
+        return $query->orderByDesc('is_active')->orderByDesc('id')->paginate($filters['per_page'] ?? 20);
     }
 
     public function getPaginated(
@@ -92,17 +124,27 @@ class ProductRepository
 
     public function create(array $data): Product
     {
-        return Product::create($data)->load(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling']);
+        return Product::create($data)->load(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
     }
 
     public function update(Product $product, array $data): Product
     {
         $product->update($data);
-        return $product->fresh(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling']);
+        return $product->fresh(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
     }
 
     public function delete(Product $product): void
     {
         $product->delete();
+    }
+
+    public function restore(int $id): void
+    {
+        Product::withTrashed()->findOrFail($id)->restore();
+    }
+
+    public function forceDelete(int $id): void
+    {
+        Product::withTrashed()->findOrFail($id)->forceDelete();
     }
 }

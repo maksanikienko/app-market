@@ -14,27 +14,47 @@ class CategoryController extends Controller
 
     public function index(): JsonResponse
     {
-        return response()->json($this->categoryService->getCategories());
+        try {
+            return response()->json($this->categoryService->getCategories());
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     public function show(Category $category): JsonResponse
     {
-        return response()->json($category);
+        try {
+            return response()->json($category);
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     public function store(CategoryRequest $request): JsonResponse
     {
-        return response()->json($this->categoryService->createCategory($request->validated()), 201);
+        try {
+            return response()->json($this->categoryService->createCategory($request->validated()), 201);
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     public function update(CategoryRequest $request, Category $category): JsonResponse
     {
-        return response()->json($this->categoryService->updateCategory($category, $request->validated()));
+        try {
+            return response()->json($this->categoryService->updateCategory($category, $request->validated()));
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     public function destroy(Category $category): JsonResponse
     {
-        $this->categoryService->deleteCategory($category);
-        return response()->json(null, 204);
+        try {
+            $this->categoryService->deleteCategory($category);
+            return response()->json(null, 204);
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 }

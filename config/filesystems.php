@@ -44,6 +44,13 @@ return [
             'throw' => false,
         ],
 
+        // Disk used by spatie/laravel-backup to store backups locally.
+        // On the server, set BACKUP_DISK=s3 in .env to store in S3 instead.
+        'backups' => [
+            'driver' => env('BACKUP_DISK_DRIVER', 'local'),
+            'root'   => storage_path('app/backups'),
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

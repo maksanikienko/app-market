@@ -12,29 +12,41 @@ class ProductImageController extends Controller
 {
     public function store(Request $request, Product $product): JsonResponse
     {
-        $request->validate([
-            'images'   => 'required|array|max:10',
-            'images.*' => 'image|max:8192',
-        ]);
+        try {
+            $request->validate([
+                'images'   => 'required|array|max:10',
+                'images.*' => 'image|max:8192',
+            ]);
 
-        foreach ($request->file('images') as $file) {
-            $product->addMedia($file)->toMediaCollection('product_images');
+            foreach ($request->file('images') as $file) {
+                $product->addMedia($file)->toMediaCollection('product_images');
+            }
+
+            return response()->json($this->items($product));
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
         }
-
-        return response()->json($this->items($product));
     }
 
     public function reorder(Request $request, Product $product): JsonResponse
     {
-        $request->validate(['ids' => 'required|array']);
-        Media::setNewOrder($request->input('ids'));
-        return response()->json($this->items($product));
+        try {
+            $request->validate(['ids' => 'required|array']);
+            Media::setNewOrder($request->input('ids'));
+            return response()->json($this->items($product));
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     public function destroy(Product $product, Media $media): JsonResponse
     {
-        $media->delete();
-        return response()->json(null, 204);
+        try {
+            $media->delete();
+            return response()->json(null, 204);
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 
     private function items(Product $product): array

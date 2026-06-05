@@ -4,21 +4,30 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
-    public function index(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    public function index(): JsonResponse
     {
-        $orders = Order::with(['products', 'products.media'])
-            ->where('status', 1)
-            ->latest()
-            ->get();
+        try {
+            $orders = Order::with(['products', 'products.media'])
+                ->where('status', 1)
+                ->latest()
+                ->get();
 
-        return response()->json($orders);
+            return response()->json($orders);
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
-    public function show(\Illuminate\Http\Request $request, Order $order)
+
+    public function show(Order $order): JsonResponse
     {
-        return response()->json($order);
+        try {
+            return response()->json($order->load(['products', 'products.media']));
+        } catch (\Throwable $e) {
+            return $this->handleError($e);
+        }
     }
 }

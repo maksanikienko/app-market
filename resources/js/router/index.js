@@ -15,7 +15,10 @@ import AdminProductForm from "@/components/pages/admin/AdminProductForm.vue";
 import AdminCategories from "@/components/pages/admin/AdminCategories.vue";
 import AdminCategoryForm from "@/components/pages/admin/AdminCategoryForm.vue";
 import AdminOrders from "@/components/pages/admin/AdminOrders.vue";
+import AdminErrors from "@/components/pages/admin/AdminErrors.vue";
+import AdminStock from "@/components/pages/admin/AdminStock.vue";
 import Cart from "@/components/pages/Cart.vue";
+import Contact from "@/components/pages/Contact.vue";
 
 const routes = [
     {
@@ -26,7 +29,8 @@ const routes = [
             { path: 'products', component: Products },
             { path: 'product/:id', component: ProductDetail, props: true },
             { path: 'profile', component: Profile, meta: { auth: true } },
-            { path: 'cart', component: Cart }
+            { path: 'cart',    component: Cart },
+            { path: 'contact', component: Contact }
         ]
     },
     {
@@ -41,6 +45,8 @@ const routes = [
             { path: 'categories/create',     component: AdminCategoryForm },
             { path: 'categories/:id/edit',   component: AdminCategoryForm, props: true },
             { path: 'orders',               component: AdminOrders },
+            { path: 'errors',               component: AdminErrors },
+            { path: 'stock',                component: AdminStock },
         ]
     },
     {
