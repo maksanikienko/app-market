@@ -27,95 +27,68 @@
       <!-- ── Gallery ─────────────────────────────────────── -->
       <div class="space-y-3">
 
-        <!-- Main Swiper -->
+        <!-- Main Carousel -->
         <div class="relative group rounded-xl overflow-hidden bg-stone-100 select-none">
           <template v-if="images.length">
-            <Swiper
-              :modules="[Thumbs]"
-              :thumbs="{ swiper: thumbsSwiper }"
-              class="aspect-[4/5] sm:aspect-square"
-              @swiper="onMainSwiper"
-              @slideChange="s => activeSlide = s.activeIndex"
+            <Carousel
+              :opts="{ loop: images.length > 1 }"
+              class="w-full"
+              @init-api="onCarouselInit"
             >
-              <SwiperSlide
-                v-for="(img, i) in images"
-                :key="img.id"
-                class="cursor-zoom-in"
-                @click="openLightbox(i)"
+              <CarouselContent class="-ml-0">
+                <CarouselItem
+                  v-for="(img, i) in images"
+                  :key="img.id"
+                  class="pl-0"
+                >
+                  <div class="aspect-[4/5] sm:aspect-square">
+                    <img
+                      :src="img.original_url"
+                      :alt="localeStore.t(product.name)"
+                      loading="lazy"
+                      class="w-full h-full object-cover cursor-zoom-in"
+                      @click="openLightbox(i)"
+                      @load="onImageLoad($event, img.id)"
+                    />
+                  </div>
+                </CarouselItem>
+              </CarouselContent>
+
+              <template v-if="images.length > 1">
+                <CarouselPrevious class="left-3 bg-white/80 backdrop-blur-sm hover:bg-white border-0 shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
+                <CarouselNext    class="right-3 bg-white/80 backdrop-blur-sm hover:bg-white border-0 shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
+              </template>
+
+              <!-- Counter -->
+              <div
+                v-if="images.length > 1"
+                class="absolute bottom-3 right-3 z-10 text-xs font-medium bg-black/40 text-white px-2.5 py-1 rounded-full pointer-events-none"
               >
-                <img
-                  :src="img.original_url"
-                  :alt="localeStore.t(product.name)"
-                  loading="lazy"
-                  class="w-full h-full object-cover"
-                  @load="onImageLoad($event, img.id)"
-                />
-              </SwiperSlide>
-            </Swiper>
+                {{ activeSlide + 1 }}/{{ images.length }}
+              </div>
 
-            <!-- Custom nav arrows -->
-            <template v-if="images.length > 1">
-              <button
-                class="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all opacity-0 group-hover:opacity-100"
-                @click="mainSwiper?.slidePrev()"
-              >
-                <ChevronLeft class="h-4 w-4 text-stone-800" />
-              </button>
-              <button
-                class="absolute right-3 top-1/2 -translate-y-1/2 z-10 h-9 w-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all opacity-0 group-hover:opacity-100"
-                @click="mainSwiper?.slideNext()"
-              >
-                <ChevronRight class="h-4 w-4 text-stone-800" />
-              </button>
-            </template>
-
-            <!-- Image counter -->
-            <div
-              v-if="images.length > 1"
-              class="absolute bottom-3 right-3 z-10 text-xs font-medium bg-black/40 text-white px-2.5 py-1 rounded-full"
-            >
-              {{ activeSlide + 1 }}/{{ images.length }}
-            </div>
-
-            <!-- Zoom hint -->
-            <div class="absolute bottom-3 left-3 z-10 flex items-center gap-1 text-white/80 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-              <ZoomIn class="h-3.5 w-3.5" />
-            </div>
-
-            <!-- Badges -->
-            <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
-              <Badge v-if="product.is_new"  class="bg-blue-500/50  text-white">{{ t('product.badge.new') }}</Badge>
-              <Badge v-if="product.is_hit"  class="bg-amber-500/50 text-white">{{ t('product.badge.hit') }}</Badge>
-              <Badge v-if="product.is_sale" class="bg-rose-500/50  text-white">{{ t('product.badge.sale') }}</Badge>
-            </div>
+            </Carousel>
           </template>
 
-          <!-- No images placeholder -->
-          <div v-else class="aspect-square flex items-center justify-center">
+          <div v-else class="aspect-[4/5] sm:aspect-square flex items-center justify-center">
             <Package class="h-16 w-16 text-stone-300" />
           </div>
         </div>
 
-        <!-- Thumbs Swiper -->
-        <Swiper
-          v-if="images.length > 1"
-          watch-slides-progress
-          :slides-per-view="5"
-          :space-between="8"
-          @swiper="setThumbsSwiper"
-          class="thumbs-swiper"
-        >
-          <SwiperSlide v-for="img in images" :key="img.id">
-            <div class="aspect-square overflow-hidden rounded-lg">
-              <img
-                :src="img.thumb_url"
-                :alt="localeStore.t(product.name)"
-                loading="lazy"
-                class="w-full h-full object-cover"
-              />
-            </div>
-          </SwiperSlide>
-        </Swiper>
+        <!-- Thumbnails -->
+        <div v-if="images.length > 1" class="grid grid-cols-5 gap-2">
+          <button
+            v-for="(img, i) in images"
+            :key="img.id"
+            @click="carouselApi?.scrollTo(i)"
+            :class="[
+              'aspect-square rounded-lg overflow-hidden transition-all ring-offset-1',
+              i === activeSlide ? 'ring-2 ring-stone-900' : 'opacity-50 hover:opacity-100'
+            ]"
+          >
+            <img :src="img.thumb_url" :alt="localeStore.t(product.name)" loading="lazy" class="w-full h-full object-cover" />
+          </button>
+        </div>
 
       </div>
 
@@ -320,21 +293,18 @@
 
 <script setup>
 import 'swiper/css'
-import 'swiper/css/thumbs'
 import 'photoswipe/style.css'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Thumbs, Autoplay } from 'swiper/modules'
+import { Autoplay } from 'swiper/modules'
 import PhotoSwipe from 'photoswipe'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import ProductCard from '@/components/parts/ProductCard.vue'
-import {
-  Heart, Minus, Plus, ShoppingCart, Package, Check,
-  ChevronLeft, ChevronRight, ZoomIn,
-} from 'lucide-vue-next'
+import { Heart, Minus, Plus, ShoppingCart, Package, Check } from 'lucide-vue-next'
 import { useProductService } from '@/services/productService.js'
 import { useCartStore } from '@/store/cartStore.js'
 import { useClassifierService } from '@/services/classifierService.js'
@@ -359,15 +329,16 @@ const selectedSize  = ref(null)
 const showValidation = ref(false)
 const featured      = ref([])
 
-// ── Swiper ──────────────────────────────────────────────
-const mainSwiper   = ref(null)
-const thumbsSwiper = ref(null)
-const activeSlide  = ref(0)
+// ── Gallery ──────────────────────────────────────────────
+const carouselApi = ref(null)
+const activeSlide = ref(0)
 
 const images = computed(() => product.value?.media_items ?? [])
 
-function onMainSwiper(swiper) { mainSwiper.value = swiper }
-function setThumbsSwiper(swiper) { thumbsSwiper.value = swiper }
+function onCarouselInit(api) {
+  carouselApi.value = api
+  api.on('select', () => { activeSlide.value = api.selectedScrollSnap() })
+}
 
 // ── PhotoSwipe ──────────────────────────────────────────
 let pswp = null
@@ -515,18 +486,3 @@ const addToCart = async () => {
 }
 </script>
 
-<style>
-/* Thumbs active state */
-.thumbs-swiper .swiper-slide {
-  opacity: 0.55;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-.thumbs-swiper .swiper-slide-thumb-active {
-  opacity: 1;
-}
-.thumbs-swiper .swiper-slide-thumb-active div {
-  outline: 2px solid hsl(var(--primary));
-  outline-offset: 2px;
-}
-</style>
