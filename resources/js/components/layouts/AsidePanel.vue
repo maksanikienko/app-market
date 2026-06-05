@@ -30,7 +30,7 @@
 
     <!-- Mobile header -->
     <div class="md:hidden flex items-center justify-between px-5 py-4 border-b border-stone-200 shrink-0">
-      <h3 class="text-xs font-semibold uppercase tracking-widest text-stone-900">{{ t('filter.title') }}</h3>
+      <h3 class="text-ыь font-semibold uppercase tracking-widest text-stone-900">{{ t('filter.title') }}</h3>
       <button
         @click="filterStore.closeMobileFilter()"
         class="p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
@@ -44,7 +44,7 @@
 
       <!-- Desktop title + clear -->
       <div class="hidden md:flex items-center justify-between mb-4">
-        <h3 class="text-xs font-semibold uppercase tracking-widest text-stone-900">{{ t('filter.title') }}</h3>
+        <h3 class="text-sm font-semibold uppercase tracking-widest text-stone-900">{{ t('filter.title') }}</h3>
         <button
           v-if="filterStore.hasAnyFilter"
           @click="filterStore.reset()"

@@ -76,8 +76,9 @@
 }
 
 @theme inline {
-    --font-sans: 'Geist', 'Geist Fallback';
-    --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+    --font-sans: 'Satoshi', system-ui, sans-serif;
+    --font-display: 'Satoshi', system-ui, sans-serif; /* или оставить лёгкий serif */
+    --font-mono: 'Geist Mono', monospace; /* можно оставить */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);

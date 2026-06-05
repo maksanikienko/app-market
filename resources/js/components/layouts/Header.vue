@@ -3,8 +3,12 @@
     <div class="max-w-screen-xl mx-auto px-6 flex h-16 items-center justify-between">
 
       <!-- Logo -->
-      <RouterLink to="/" class="text-base font-semibold tracking-[0.15em] uppercase text-stone-900 hover:text-stone-600 transition-colors">
-        foryou
+      <RouterLink
+        to="/"
+        class="text-xl tracking-[0.3em] uppercase text-stone-900 hover:text-stone-500 transition-colors"
+        style="font-family: var(--font-display); font-weight: 300;"
+      >
+        FORYOU
       </RouterLink>
 
       <!-- Nav -->
