@@ -131,9 +131,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useCartStore } from '@/store/cartStore';
+import { useUserStore } from '@/store/userStore';
 import CartService from '@/services/cartService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -149,6 +150,7 @@ import { useLocaleStore } from '@/store/localeStore';
 import { useI18n } from '@/i18n';
 
 const cartStore   = useCartStore();
+const userStore   = useUserStore();
 const localeStore = useLocaleStore();
 const { t }       = useI18n();
 const promoCode   = ref('');
@@ -166,6 +168,12 @@ const subtotal = computed(() =>
 const shipping = computed(() => subtotal.value > 50 ? 0 : 10);
 const tax      = computed(() => subtotal.value * 0.1);
 const total    = computed(() => subtotal.value + shipping.value + tax.value);
+
+watch(dialogOpen, (open) => {
+  if (open && !orderForm.value.name && userStore.user?.name) {
+    orderForm.value.name = userStore.user.name;
+  }
+});
 
 const orderSuccessMsg = computed(() =>
   localeStore.current === 'ru'

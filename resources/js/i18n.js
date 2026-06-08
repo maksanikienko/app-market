@@ -8,6 +8,7 @@ const ui = {
   'nav.login':    { ru: 'Войти',                 ro: 'Autentificare' },
   'nav.register': { ru: 'Регистрация',            ro: 'Înregistrare' },
   'nav.admin':    { ru: 'Панель администратора', ro: 'Panou admin' },
+  'nav.profile':  { ru: 'Личный кабинет',         ro: 'Cabinet personal' },
   'nav.logout':   { ru: 'Выйти',                 ro: 'Ieșire' },
 
   // Contact page
@@ -170,6 +171,51 @@ const ui = {
   'card.view':  { ru: 'Подробнее', ro: 'Detalii' },
   'card.add':   { ru: 'В корзину', ro: 'În coș' },
   'card.added': { ru: 'В корзине', ro: 'Adăugat' },
+
+  // Profile / personal cabinet
+  'profile.title':           { ru: 'Личный кабинет',          ro: 'Cabinet personal' },
+  'profile.subtitle':        { ru: 'Ваши данные и история заказов', ro: 'Datele tale și istoricul comenzilor' },
+  'profile.orders.title':    { ru: 'История заказов',          ro: 'Istoricul comenzilor' },
+  'profile.orders.empty':    { ru: 'У вас пока нет заказов',    ro: 'Nu ai încă nicio comandă' },
+  'profile.orders.empty.cta':{ ru: 'Перейти к покупкам',        ro: 'Mergi la cumpărături' },
+  'profile.orders.itemsCount': { ru: 'товаров',                ro: 'produse' },
+  'profile.orders.toggle.more': { ru: 'Ещё',                   ro: 'Mai multe' },
+  'profile.orders.toggle.less': { ru: 'Свернуть',              ro: 'Restrânge' },
+
+  // Auth — shared fields
+  'auth.fields.name':            { ru: 'Имя',                 ro: 'Nume' },
+  'auth.fields.surname':         { ru: 'Фамилия',             ro: 'Prenume' },
+  'auth.fields.email':           { ru: 'Email',               ro: 'Email' },
+  'auth.fields.password':        { ru: 'Пароль',              ro: 'Parolă' },
+  'auth.fields.passwordHint':    { ru: 'Минимум 5 символов',  ro: 'Minimum 5 caractere' },
+  'auth.fields.confirmPassword': { ru: 'Повторите пароль',    ro: 'Repetă parola' },
+  'auth.or':                     { ru: 'или',                 ro: 'sau' },
+  'auth.google':                 { ru: 'Google',              ro: 'Google' },
+
+  // Auth — Login
+  'auth.login.title':       { ru: 'Вход',                                   ro: 'Autentificare' },
+  'auth.login.subtitle':    { ru: 'Введите данные своей учётной записи',     ro: 'Introduceți datele contului dvs.' },
+  'auth.login.panelTitle':  { ru: 'С возвращением',                          ro: 'Bine ai revenit' },
+  'auth.login.panelDesc':   { ru: 'Войдите, чтобы продолжить покупки, отслеживать заказы и сохранять любимые товары.', ro: 'Autentifică-te pentru a continua cumpărăturile, a urmări comenzile și a salva produsele favorite.' },
+  'auth.login.remember':    { ru: 'Запомнить меня',                          ro: 'Ține-mă minte' },
+  'auth.login.submit':      { ru: 'Войти',                                   ro: 'Autentificare' },
+  'auth.login.submitting':  { ru: 'Входим…',                                 ro: 'Se conectează…' },
+  'auth.login.noAccount':   { ru: 'Нет аккаунта?',                           ro: 'Nu ai cont?' },
+  'auth.login.toRegister':  { ru: 'Зарегистрироваться',                      ro: 'Înregistrează-te' },
+  'auth.login.success':     { ru: 'Добро пожаловать!',                       ro: 'Bine ai venit!' },
+  'auth.login.error':       { ru: 'Неверный email или пароль',               ro: 'Email sau parolă incorectă' },
+
+  // Auth — Register
+  'auth.register.title':      { ru: 'Регистрация',                                            ro: 'Înregistrare' },
+  'auth.register.subtitle':   { ru: 'Создайте аккаунт, чтобы оформлять заказы быстрее',         ro: 'Creează un cont pentru a plasa comenzi mai rapid' },
+  'auth.register.panelTitle': { ru: 'Добро пожаловать',                                        ro: 'Bine ai venit' },
+  'auth.register.panelDesc':  { ru: 'Создайте аккаунт и получите доступ к заказам, избранному и персональным предложениям.', ro: 'Creează un cont și ai acces la comenzi, favorite și oferte personalizate.' },
+  'auth.register.submit':     { ru: 'Создать аккаунт',                                         ro: 'Creează cont' },
+  'auth.register.submitting': { ru: 'Создаём аккаунт…',                                        ro: 'Se creează contul…' },
+  'auth.register.haveAccount':{ ru: 'Уже есть аккаунт?',                                       ro: 'Ai deja cont?' },
+  'auth.register.toLogin':    { ru: 'Войти',                                                   ro: 'Autentifică-te' },
+  'auth.register.success':    { ru: 'Аккаунт успешно создан',                                  ro: 'Cont creat cu succes' },
+  'auth.register.error':      { ru: 'Не удалось создать аккаунт',                              ro: 'Nu s-a putut crea contul' },
 }
 
 export function useI18n() {

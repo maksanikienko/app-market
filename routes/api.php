@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\ClassifierController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -37,6 +38,15 @@ Route::prefix('basket')->controller(BasketController::class)->group(function () 
     Route::post('/remove/{id}', 'remove')->name('api.basket-remove');
     Route::post('/update', 'update')->name('api.basket-update');
     Route::post('/place', 'place')->name('api.basket-place');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Profile (auth)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->prefix('profile')->group(function () {
+    Route::get('/orders', [ProfileController::class, 'orders'])->name('api.profile.orders');
 });
 
 /*
