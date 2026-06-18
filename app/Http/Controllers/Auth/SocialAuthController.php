@@ -28,6 +28,7 @@ class SocialAuthController extends Controller
                 'name'              => $googleUser->getName(),
                 'email'             => $googleUser->getEmail(),
                 'email_verified_at' => now(),
+                'avatar'            => $googleUser->getAvatar(),
             ]
         );
 

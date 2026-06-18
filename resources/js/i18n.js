@@ -9,6 +9,7 @@ const ui = {
   'nav.register': { ru: 'Регистрация',            ro: 'Înregistrare' },
   'nav.admin':    { ru: 'Панель администратора', ro: 'Panou admin' },
   'nav.logout':   { ru: 'Выйти',                 ro: 'Ieșire' },
+  'nav.profile':  { ru: 'Мои заказы',            ro: 'Comenzile mele' },
 
   // Contact page
   'contact.title':    { ru: 'Контакты',                                          ro: 'Contacte' },

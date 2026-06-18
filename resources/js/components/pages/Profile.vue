@@ -105,19 +105,13 @@
                     {{ localeStore.t(product.name) }}
                   </p>
                   <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <TooltipProvider v-if="product.pivot?.color_hex">
-                      <Tooltip>
-                        <TooltipTrigger as-child>
-                          <span
-                            class="inline-block w-3.5 h-3.5 rounded-full border border-black/10 shrink-0 cursor-default"
-                            :style="{ backgroundColor: product.pivot.color_hex }"
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>{{ product.pivot.color }}</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <span
+                      v-if="product.pivot?.color_hex"
+                      class="inline-block w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
+                      :style="{ backgroundColor: product.pivot.color_hex }"
+                    />
                     <span v-if="product.pivot?.color" class="text-[11px] text-stone-400">
-                      {{ product.pivot.color }}
+                      {{ parseColor(product.pivot.color) }}
                     </span>
                     <Badge v-if="product.pivot?.size" variant="outline" class="text-[10px] px-1.5 py-0 h-5">
                       {{ product.pivot.size }}
@@ -158,7 +152,6 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 
 const { t } = useI18n()
 const userStore = useUserStore()
@@ -188,4 +181,15 @@ const formatTotal = (order) =>
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' })
+
+const parseColor = (color) => {
+  if (!color) return ''
+  if (typeof color === 'object') return localeStore.t(color)
+  try {
+    const parsed = JSON.parse(color)
+    return localeStore.t(parsed)
+  } catch {
+    return color
+  }
+}
 </script>

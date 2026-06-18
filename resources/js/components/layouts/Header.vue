@@ -57,8 +57,11 @@
         <!-- User -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button class="p-2 rounded-lg hover:bg-stone-100 transition-colors">
-              <User class="h-5 w-5 text-stone-700" />
+            <button class="p-1 rounded-full hover:ring-2 hover:ring-stone-200 transition-all">
+              <Avatar class="h-8 w-8">
+                <AvatarImage v-if="user?.avatar" :src="user.avatar" :alt="user.name" />
+                <AvatarFallback>{{ initials }}</AvatarFallback>
+              </Avatar>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
@@ -88,7 +91,8 @@ import { useUserStore } from './../../store/userStore.js';
 import { useLocaleStore } from './../../store/localeStore.js';
 import { useI18n } from '@/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { ShoppingCart, User } from 'lucide-vue-next';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ShoppingCart } from 'lucide-vue-next';
 import { useCartStore } from './../../store/cartStore.js';
 
 const router = useRouter();
@@ -96,6 +100,10 @@ const userStore = useUserStore();
 const localeStore = useLocaleStore();
 const { t } = useI18n();
 const user = computed(() => userStore.user);
+const initials = computed(() => {
+  if (!user.value?.name) return '?'
+  return user.value.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+});
 const cartStore = useCartStore();
 cartStore.fetchCart();
 
