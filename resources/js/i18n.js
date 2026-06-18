@@ -170,6 +170,17 @@ const ui = {
   'card.view':  { ru: 'Подробнее', ro: 'Detalii' },
   'card.add':   { ru: 'В корзину', ro: 'În coș' },
   'card.added': { ru: 'В корзине', ro: 'Adăugat' },
+
+  // Profile
+  'profile.title':        { ru: 'Профиль',          ro: 'Profil' },
+  'profile.orders.title': { ru: 'Мои заказы',        ro: 'Comenzile mele' },
+  'profile.orders.empty': { ru: 'Заказов пока нет',  ro: 'Nicio comandă încă' },
+  'profile.orders.count': { ru: 'заказа',            ro: 'comenzi' },
+  'profile.order.id':     { ru: 'Заказ',             ro: 'Comandă' },
+  'profile.order.total':  { ru: 'Итого',             ro: 'Total' },
+  'profile.order.qty':    { ru: 'Кол-во',            ro: 'Cantitate' },
+  'profile.order.price':  { ru: 'Сумма',             ro: 'Sumă' },
+  'profile.order.name':   { ru: 'Товар',             ro: 'Produs' },
 }
 
 export function useI18n() {

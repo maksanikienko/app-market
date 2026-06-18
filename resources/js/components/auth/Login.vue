@@ -2,6 +2,10 @@
   <div class="flex min-h-screen items-center justify-center min-w-lg">
     <Card class="w-full ">
       <CardHeader class="space-y-2">
+        <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
+          <ArrowLeft class="h-3.5 w-3.5" />
+          Home
+        </RouterLink>
         <CardTitle class="text-2xl">Login</CardTitle>
         <CardDescription>Enter personal data</CardDescription>
       </CardHeader>
@@ -33,7 +37,7 @@
 
           <Separator />
 
-          <Button variant="outline" type="button" class="w-full" disabled>
+          <Button variant="outline" type="button" class="w-full" @click="loginWithGoogle">
             <Chrome class="h-4 w-4 mr-2" />
             Google
           </Button>
@@ -63,7 +67,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'vue-sonner';
-import { LogIn, Github, Chrome } from 'lucide-vue-next';
+import { LogIn, Github, Chrome, ArrowLeft } from 'lucide-vue-next';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -75,6 +79,10 @@ const form = reactive({
 
 const errors = ref({});
 const isLoading = ref(false);
+
+const loginWithGoogle = () => {
+  window.location.href = '/auth/google/redirect';
+};
 
 const submit = async () => {
   isLoading.value = true;

@@ -67,6 +67,7 @@
             </div>
             <DropdownMenuItem v-if="!user" @click="navigateTo('/login')">{{ t('nav.login') }}</DropdownMenuItem>
             <DropdownMenuItem v-if="!user" @click="navigateTo('/register')">{{ t('nav.register') }}</DropdownMenuItem>
+            <DropdownMenuItem v-if="user" @click="navigateTo('/profile')">My orders</DropdownMenuItem>
             <DropdownMenuItem v-if="userStore.isAdmin" @click="navigateTo('/admin/orders')" class="text-stone-600">
               {{ t('nav.admin') }}
             </DropdownMenuItem>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ErrorLogController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +38,15 @@ Route::prefix('basket')->controller(BasketController::class)->group(function () 
     Route::post('/remove/{id}', 'remove')->name('api.basket-remove');
     Route::post('/update', 'update')->name('api.basket-update');
     Route::post('/place', 'place')->name('api.basket-place');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Profile (auth required)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->prefix('profile')->group(function () {
+    Route::get('/orders', [ProfileController::class, 'orders']);
 });
 
 /*

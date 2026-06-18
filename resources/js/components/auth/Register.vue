@@ -2,6 +2,10 @@
   <div class="flex min-h-screen items-center justify-center px-4">
     <Card class="w-full max-w-md">
       <CardHeader class="space-y-2">
+        <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
+          <ArrowLeft class="h-3.5 w-3.5" />
+          Home
+        </RouterLink>
         <CardTitle class="text-2xl">Register</CardTitle>
         <CardDescription>Create new account</CardDescription>
       </CardHeader>
@@ -71,7 +75,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { UserPlus, Github, Chrome } from 'lucide-vue-next';
+import { UserPlus, Github, Chrome, ArrowLeft } from 'lucide-vue-next';
 
 const router = useRouter()
 

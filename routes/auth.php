@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest'])->group(function () {
@@ -20,3 +21,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/logout', [LoginController::class, 'logout']);
+
+Route::prefix('auth/google')->controller(SocialAuthController::class)->group(function () {
+    Route::get('redirect', 'redirect');
+    Route::get('callback', 'callback');
+});
