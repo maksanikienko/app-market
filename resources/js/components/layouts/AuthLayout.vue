@@ -2,8 +2,8 @@
 
 </script>
 
-<template id="yq6g0j">
-  <div class="min-h-screen flex items-center justify-center">
+<template >
+  <div >
     <router-view />
   </div>
 </template>
