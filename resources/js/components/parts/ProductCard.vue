@@ -1,6 +1,6 @@
 <template>
   <article
-    class="group bg-white rounded-xl overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-lg hover:border"
+    class="group bg-white rounded-xl overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-lg hover:border flex flex-col"
     @click="$router.push(`/product/${product.id}`)"
   >
     <!-- Image -->
@@ -46,17 +46,18 @@
     </div>
 
     <!-- Info -->
-    <div class="p-4">
-      <div class="flex justify-between">
-        <p class="text-[10px] font-medium uppercase tracking-widest text-stone-400">
+    <div class="p-4 flex flex-col flex-1 gap-2">
+
+      <!-- Category / brand + color swatches -->
+      <div class="flex justify-between items-center">
+        <p class="text-[10px] font-medium uppercase tracking-widest text-stone-400 truncate">
           {{ product.brand?.name ?? localeStore.t(product.category?.name) ?? '' }}
         </p>
-        <!-- Color swatches -->
-        <div v-if="uniqueColors.length" class="flex items-center flex-wrap gap-0.5">
+        <div v-if="uniqueColors.length" class="flex items-center flex-wrap gap-0.5 shrink-0 ml-2">
           <span
             v-for="c in uniqueColors.slice(0, 8)"
             :key="c"
-            class="w-3.5 h-3.5 rounded-full border border-stone-200 shrink-0"
+            class="w-3 h-3 rounded-full border border-stone-200 shrink-0"
             :style="{ backgroundColor: c }"
           />
           <span v-if="uniqueColors.length > 8" class="text-[10px] text-stone-400 leading-none">
@@ -65,15 +66,28 @@
         </div>
       </div>
 
-      <h3 class="text-sm font-medium text-stone-900 leading-snug mt-0.5 line-clamp-2">
-        {{ localeStore.t(product.name) }}
-      </h3>
-      <div class="flex items-baseline gap-2 mt-2">
+      <!-- Name with tooltip -->
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <h3 class="text-sm font-medium text-stone-900 leading-snug line-clamp-2 text-left cursor-default">
+              {{ localeStore.t(product.name) }}
+            </h3>
+          </TooltipTrigger>
+          <TooltipContent side="top" class="max-w-56 text-center text-xs">
+            {{ localeStore.t(product.name) }}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <!-- Price — always at bottom -->
+      <div class="flex items-baseline gap-2 mt-auto pt-1">
         <span class="text-base font-semibold text-stone-900">{{ Number(product.price).toFixed(2) }} lei</span>
         <span v-if="product.old_price" class="text-xs line-through text-stone-400">
           {{ Number(product.old_price).toFixed(2) }} lei
         </span>
       </div>
+
     </div>
   </article>
 
@@ -157,6 +171,7 @@ import { useLocaleStore } from '@/store/localeStore.js';
 import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'vue-sonner';
 
 const props = defineProps({ product: { type: Object, required: true } });

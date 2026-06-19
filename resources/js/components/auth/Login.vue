@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-4 py-8">
+  <div class="flex min-h-screen items-center justify-center px-4 py-8 select-none">
     <Card class="w-full max-w-md">
       <CardHeader class="space-y-2">
         <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-8">
+  <div class="space-y-8 select-none">
     <h1 class="text-3xl font-bold">{{ t('cart.title') }}</h1>
 
     <!-- ── Success screen ──────────────────────────────────────────── -->

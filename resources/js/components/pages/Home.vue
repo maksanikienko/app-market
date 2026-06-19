@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-14 pb-16">
+  <div class="space-y-14 pb-16 select-none">
 
     <!-- Store Title Hero -->
     <section class="relative overflow-hidden rounded-2xl text-white min-h-[420px] md:min-h-[500px] flex items-center">

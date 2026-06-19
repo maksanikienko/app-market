@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-4 py-8">
+  <div class="flex min-h-screen items-center justify-center px-4 py-8 select-none">
     <Card class="w-full max-w-md">
       <CardHeader class="space-y-2">
         <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
@@ -44,17 +44,17 @@
             {{ isLoading ? t('auth.register.submitting') : t('auth.register.submit') }}
           </Button>
 
-          <div class="relative">
-            <Separator />
-            <span class="absolute inset-0 flex items-center justify-center">
-              <span class="bg-card px-2 text-xs text-muted-foreground">{{ t('auth.or') }}</span>
-            </span>
-          </div>
+<!--          <div class="relative">-->
+<!--            <Separator />-->
+<!--            <span class="absolute inset-0 flex items-center justify-center">-->
+<!--              <span class="bg-card px-2 text-xs text-muted-foreground">{{ t('auth.or') }}</span>-->
+<!--            </span>-->
+<!--          </div>-->
 
-          <Button variant="outline" type="button" class="w-full" disabled>
-            <Chrome class="h-4 w-4 mr-2" />
-            {{ t('auth.google') }}
-          </Button>
+<!--          <Button variant="outline" type="button" class="w-full" disabled>-->
+<!--            <Chrome class="h-4 w-4 mr-2" />-->
+<!--            {{ t('auth.google') }}-->
+<!--          </Button>-->
         </form>
       </CardContent>
 

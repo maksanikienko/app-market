@@ -26,6 +26,7 @@
       'md:sticky md:bottom-auto md:top-16 md:h-[calc(100vh-4rem)] md:z-auto',
       'md:w-56 md:shadow-none md:border-r md:border-stone-200 md:translate-x-0',
     ]"
+    class="select-none"
   >
 
     <!-- Mobile header -->
@@ -44,7 +45,7 @@
 
       <!-- Desktop title + clear -->
       <div class="hidden md:flex items-center justify-between mb-4">
-        <h3 class="text-sm font-semibold uppercase tracking-widest text-stone-900">{{ t('filter.title') }}</h3>
+        <h3 class="text-sm font-semibold uppercase tracking-widest text-stone-900 cursor-default">{{ t('filter.title') }}</h3>
         <button
           v-if="filterStore.hasAnyFilter"
           @click="filterStore.reset()"

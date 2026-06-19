@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-50 bg-stone-100 border-b border-stone-200">
+  <header class="sticky top-0 z-50 bg-stone-100 border-b border-stone-200 select-none">
     <div class="max-w-screen-xl mx-auto px-6 flex h-16 items-center justify-between">
 
       <!-- Logo -->
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Cart -->
-        <RouterLink to="/cart" class="relative p-2 rounded-lg hover:bg-stone-100 transition-colors">
+        <RouterLink to="/cart" class="relative p-2 rounded-full hover:ring-2 hover:ring-stone-200 transition-all cursor-default">
           <ShoppingCart class="h-5 w-5 text-stone-700" />
           <span
             v-if="cartStore.count > 0"
@@ -57,11 +57,14 @@
         <!-- User -->
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button class="p-1 rounded-full hover:ring-2 hover:ring-stone-200 transition-all">
+            <button v-if="user" class="p-2 rounded-full hover:ring-2 hover:ring-stone-200 transition-all">
               <Avatar class="h-8 w-8">
-                <AvatarImage v-if="user?.avatar" :src="user.avatar" :alt="user.name" />
+                <AvatarImage v-if="user.avatar" :src="user.avatar" :alt="user.name" />
                 <AvatarFallback>{{ initials }}</AvatarFallback>
               </Avatar>
+            </button>
+            <button v-else class="p-2 rounded-full hover:ring-2 hover:ring-stone-200 transition-all">
+              <User class=" h-5 w-5 text-stone-700" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
@@ -92,7 +95,7 @@ import { useLocaleStore } from './../../store/localeStore.js';
 import { useI18n } from '@/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ShoppingCart } from 'lucide-vue-next';
+import { ShoppingCart, User } from 'lucide-vue-next';
 import { useCartStore } from './../../store/cartStore.js';
 
 const router = useRouter();

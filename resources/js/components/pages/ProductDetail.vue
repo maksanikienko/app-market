@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div v-else-if="product" class="space-y-8">
+  <div v-else-if="product" class="space-y-8 select-none">
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 text-sm">
       <RouterLink to="/products" class="text-muted-foreground hover:text-foreground transition-colors">
