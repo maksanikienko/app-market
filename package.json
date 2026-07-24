@@ -38,7 +38,8 @@
         "vue": "^3.5.28",
         "vue-draggable-plus": "^0.6.1",
         "vue-router": "^4.6.4",
-        "vue-sonner": "^2.0.9"
+        "vue-sonner": "^2.0.9",
+        "ziggy-js": "^2.6.3"
     },
     "name": "app-market",
     "version": "1.0.0",

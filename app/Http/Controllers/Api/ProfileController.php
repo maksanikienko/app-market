@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\RouteDiscovery\Attributes\Route;
 
 class ProfileController extends Controller
 {
     public function __construct(public ProfileService $profileService) {}
 
+    #[Route(method: 'GET', name: 'api.profile.orders', middleware: 'auth')]
     public function orders(Request $request): JsonResponse
     {
         try {

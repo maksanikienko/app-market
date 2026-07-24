@@ -1,33 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
+use App\DataTransferObjects\AdminProductFilters;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\RouteDiscovery\Attributes\Route;
 
+#[Route(middleware: ['auth', 'role:admin'])]
 class ProductController extends Controller
 {
     public function __construct(public ProductService $productService) {}
 
+    #[Route(method: 'GET', fullUri: 'admin/products', name: 'api.admin.products.index')]
     public function index(Request $request): JsonResponse
     {
         try {
-            $filters = [
-                'code'        => $request->string('code')->trim()->value() ?: null,
-                'name'        => $request->string('name')->trim()->value() ?: null,
-                'category_id' => $request->filled('category_id') ? (int) $request->input('category_id') : null,
-                'is_new'      => $request->has('is_new')  ? (bool) (int) $request->input('is_new')  : null,
-                'is_hit'      => $request->has('is_hit')  ? (bool) (int) $request->input('is_hit')  : null,
-                'is_sale'     => $request->has('is_sale') ? (bool) (int) $request->input('is_sale') : null,
-                'trashed'     => $request->boolean('trashed', false),
-                'per_page'    => $request->integer('per_page', 20),
-            ];
-
-            $paginator = $this->productService->getAdminProducts($filters);
+            $paginator = $this->productService->getAdminProducts(AdminProductFilters::fromRequest($request));
 
             return response()->json([
                 'data' => $paginator->items(),
@@ -43,6 +38,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: 'POST', fullUri: 'admin/products', name: 'api.admin.products.store')]
     public function store(ProductRequest $request): JsonResponse
     {
         try {
@@ -52,6 +48,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: ['PUT', 'PATCH'], fullUri: 'admin/products/{product}', name: 'api.admin.products.update')]
     public function update(ProductRequest $request, Product $product): JsonResponse
     {
         try {
@@ -61,6 +58,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: 'DELETE', fullUri: 'admin/products/{product}', name: 'api.admin.products.destroy')]
     public function destroy(Product $product): JsonResponse
     {
         try {
@@ -71,6 +69,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: 'POST', fullUri: 'admin/products/{id}/restore', name: 'api.admin.products.restore')]
     public function restore(int $id): JsonResponse
     {
         try {
@@ -81,6 +80,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: 'DELETE', fullUri: 'admin/products/{id}/force-delete', name: 'api.admin.products.force-delete')]
     public function forceDelete(int $id): JsonResponse
     {
         try {

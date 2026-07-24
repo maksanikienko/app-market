@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 
 class CategoryRepository
 {
-
-    public function getCategories(): \Illuminate\Database\Eloquent\Collection
+    public function getCategories(): Collection
     {
         return Category::orderBy('sort_order')->get();
     }

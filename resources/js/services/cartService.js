@@ -1,9 +1,10 @@
 import axios from 'axios';
+import {route} from "ziggy-js";
 
 export default class CartService {
 
     static async fetchBasket() {
-        const { data } = await axios.get('/api/basket');
+        const { data } = await axios.get(route('api.basket.index'));
 
         if (data.success && data.order) {
             return data.order.products.map(p => ({
@@ -23,17 +24,17 @@ export default class CartService {
     }
 
     static async add(productId, variantData = {}) {
-        await axios.post(`/api/basket/add/${productId}`, variantData);
+        await axios.post(route('api.basket-add', productId), variantData);
         return CartService.fetchBasket();
     }
 
     static async remove(productId) {
-        await axios.post(`/api/basket/remove/${productId}`);
+        await axios.post(route('api.basket-remove', productId));
         return CartService.fetchBasket();
     }
 
     static async updateQuantity(productId, quantity) {
-        await axios.post(`/api/basket/update`, {
+        await axios.post(route('api.basket-update'), {
             product_id: productId,
             quantity: quantity
         });
@@ -41,7 +42,7 @@ export default class CartService {
     }
 
     static async placeOrder({ name = '', phone = '' } = {}) {
-        const { data } = await axios.post('/api/basket/place', { name, phone });
+        const { data } = await axios.post(route('api.basket-place'), { name, phone });
         return data; // { success, message, order_id }
     }
 }

@@ -255,7 +255,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
 import { X } from 'lucide-vue-next';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -263,6 +262,7 @@ import { useCategoryStore } from '@/store/categoryStore.js';
 import { useFilterStore } from '@/store/filterStore.js';
 import { useLocaleStore } from '@/store/localeStore.js';
 import { useClassifierService } from '@/services/classifierService.js';
+import { useProductService } from '@/services/productService.js';
 import { useI18n } from '@/i18n';
 import { storeToRefs } from 'pinia';
 
@@ -270,6 +270,7 @@ const categoryStore = useCategoryStore();
 const filterStore   = useFilterStore();
 const localeStore   = useLocaleStore();
 const { getClassifiers } = useClassifierService();
+const { getVariantOptions } = useProductService();
 const { t } = useI18n();
 
 const { categories } = storeToRefs(categoryStore);
@@ -292,7 +293,7 @@ onMounted(async () => {
   const [, classifiers, vOpts] = await Promise.all([
     categories.value.length === 0 ? categoryStore.load() : Promise.resolve(null),
     getClassifiers(),
-    axios.get('/api/products/variant-options').then(r => r.data),
+    getVariantOptions(),
   ]);
   if (classifiers) cls.value = classifiers;
   variantOptions.value = vOpts ?? { colors: [], sizes: [] };

@@ -2,26 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MergesTranslatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, MergesTranslatable;
 
     protected $fillable = ['name', 'slug', 'description', 'is_active', 'sort_order'];
 
     public array $translatable = ['name', 'description'];
-
-    public function toArray(): array
-    {
-        $arr = parent::toArray();
-        foreach ($this->translatable as $field) {
-            $arr[$field] = $this->getTranslations($field);
-        }
-        return $arr;
-    }
 
     public function products()
     {

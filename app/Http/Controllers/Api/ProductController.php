@@ -1,38 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
+use App\DataTransferObjects\ProductFilters;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\RouteDiscovery\Attributes\Route;
+use Spatie\RouteDiscovery\Attributes\Where;
 
 class ProductController extends Controller
 {
     public function __construct(public ProductService $productService) {}
 
+    #[Route(method: ['GET'], name: 'api.products.index')]
     public function index(Request $request): JsonResponse
     {
         try {
-            $paginator = $this->productService->getPaginatedProducts(
-                perPage:         (int) $request->integer('per_page', 12),
-                search:          $request->string('search')->trim()->value() ?: null,
-                categories:      array_filter(array_map('intval', (array) $request->input('categories', []))),
-                priceMin:        $request->filled('price_min') ? (float) $request->input('price_min') : null,
-                priceMax:        $request->filled('price_max') ? (float) $request->input('price_max') : null,
-                outerMaterials:  array_filter(array_map('intval', (array) $request->input('outer_materials', []))),
-                liningMaterials: array_filter(array_map('intval', (array) $request->input('lining_materials', []))),
-                fillings:        array_filter(array_map('intval', (array) $request->input('fillings', []))),
-                seasons:         array_filter((array) $request->input('seasons', [])),
-                lengths:         array_filter((array) $request->input('lengths', [])),
-                hood:            $request->filled('hood') ? (bool) $request->input('hood') : null,
-                waterproof:      $request->filled('waterproof') ? (bool) $request->input('waterproof') : null,
-                colors:          array_filter((array) $request->input('colors', [])),
-                sizes:           array_filter((array) $request->input('sizes', [])),
-            );
+            $paginator = $this->productService->getPaginatedProducts(ProductFilters::fromRequest($request));
 
             return response()->json([
-                'data' => $paginator->items(),
+                'data' => ProductResource::collection($paginator->items()),
                 'meta' => [
                     'current_page' => $paginator->currentPage(),
                     'last_page'    => $paginator->lastPage(),
@@ -45,6 +37,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: ['GET'], name: 'api.products.featured')]
     public function featured(): JsonResponse
     {
         try {
@@ -54,6 +47,7 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: ['GET'], name: 'api.products.variant-options')]
     public function variantOptions(): JsonResponse
     {
         try {
@@ -63,6 +57,8 @@ class ProductController extends Controller
         }
     }
 
+    #[Route(method: ['GET'], uri: '{id}', name: 'api.products.show')]
+    #[Where('id', Where::numeric)]
     public function show(int $id): JsonResponse
     {
         try {

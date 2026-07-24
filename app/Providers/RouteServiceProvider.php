@@ -7,6 +7,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Spatie\RouteDiscovery\Discovery\Discover;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -33,7 +34,11 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->namespace($this->namespace)
                 ->prefix('api')
-                ->group(base_path('routes/api.php'));
+                ->group(function () {
+                    require base_path('routes/api.php');
+
+                    Discover::controllers()->in(app_path('Http/Controllers'));
+                });
 
             Route::middleware('web')
                 ->namespace($this->namespace)

@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\DataTransferObjects\AdminProductFilters;
+use App\DataTransferObjects\ProductFilters;
 use App\Repository\ProductRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -14,32 +18,14 @@ class ProductService
         return $this->productRepository->getProducts();
     }
 
-    public function getAdminProducts(array $filters = []): LengthAwarePaginator
+    public function getAdminProducts(AdminProductFilters $filters): LengthAwarePaginator
     {
         return $this->productRepository->getAdminFiltered($filters);
     }
 
-    public function getPaginatedProducts(
-        int     $perPage        = 12,
-        ?string $search         = null,
-        array   $categories     = [],
-        ?float  $priceMin       = null,
-        ?float  $priceMax       = null,
-        array   $outerMaterials  = [],
-        array   $liningMaterials = [],
-        array   $fillings        = [],
-        array   $seasons         = [],
-        array   $lengths         = [],
-        ?bool   $hood            = null,
-        ?bool   $waterproof      = null,
-        array   $colors          = [],
-        array   $sizes           = [],
-    ): LengthAwarePaginator {
-        return $this->productRepository->getPaginated(
-            $perPage, $search, $categories, $priceMin, $priceMax,
-            $outerMaterials, $liningMaterials, $fillings,
-            $seasons, $lengths, $hood, $waterproof, $colors, $sizes,
-        );
+    public function getPaginatedProducts(ProductFilters $filters): LengthAwarePaginator
+    {
+        return $this->productRepository->getPaginated($filters);
     }
 
     public function getVariantOptions(): array
@@ -70,7 +56,7 @@ class ProductService
 
     public function updateProduct(\App\Models\Product $product, array $data): \App\Models\Product
     {
-        $variants = array_key_exists('variants', $data) ? $data['variants'] : null;
+        $variants = $data['variants'] ?? null;
         unset($data['variants'], $data['_method']);
         $product = $this->productRepository->update($product, $data);
         if ($variants !== null) {

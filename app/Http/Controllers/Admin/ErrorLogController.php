@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\RouteDiscovery\Attributes\Route;
 
+#[Route(middleware: ['auth', 'role:admin'])]
 class ErrorLogController extends Controller
 {
+    #[Route(method: 'GET', fullUri: 'admin/errors', name: 'api.admin.errors.index')]
     public function index(Request $request): JsonResponse
     {
         try {
@@ -39,6 +42,7 @@ class ErrorLogController extends Controller
         }
     }
 
+    #[Route(method: 'DELETE', fullUri: 'admin/errors/{activity}', name: 'api.admin.errors.destroy')]
     public function destroy(Activity $activity): JsonResponse
     {
         try {

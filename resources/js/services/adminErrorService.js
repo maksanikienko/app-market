@@ -1,8 +1,7 @@
 import axios from 'axios';
-
-const base = '/api/admin/errors';
+import { route } from 'ziggy-js';
 
 export const adminErrorService = {
-    getAll:  (params = {}) => axios.get(base, { params }).then(r => r.data),
-    remove:  (id)          => axios.delete(`${base}/${id}`),
+    getAll:  (params = {}) => axios.get(route('api.admin.errors.index'), { params }).then(r => r.data),
+    remove:  (id)          => axios.delete(route('api.admin.errors.destroy', id)),
 };

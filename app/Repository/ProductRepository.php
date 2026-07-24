@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
+use App\DataTransferObjects\AdminProductFilters;
+use App\DataTransferObjects\ProductFilters;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -9,9 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class ProductRepository
 {
-    private function withRelations()
+    private const RELATIONS = ['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location'];
+
+    private function withRelations(): \Illuminate\Database\Eloquent\Builder
     {
-        return Product::with(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
+        return Product::with(self::RELATIONS);
     }
 
     public function getProducts(): \Illuminate\Database\Eloquent\Collection
@@ -19,77 +25,63 @@ class ProductRepository
         return $this->withRelations()->get();
     }
 
-    public function getAdminFiltered(array $filters = []): LengthAwarePaginator
+    public function getAdminFiltered(AdminProductFilters $filters): LengthAwarePaginator
     {
-        $query = !empty($filters['trashed'])
+        $query = $filters->trashed
             ? $this->withRelations()->onlyTrashed()
             : $this->withRelations();
 
-        if (!empty($filters['code'])) {
-            $query->where('code', 'like', "%{$filters['code']}%");
+        if ($filters->code) {
+            $query->where('code', 'like', "%{$filters->code}%");
         }
-        if (!empty($filters['name'])) {
-            $like = "%{$filters['name']}%";
+        if ($filters->name) {
+            $like = "%{$filters->name}%";
             $query->where(function ($q) use ($like) {
                 $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ro')) LIKE ?", [$like])
                   ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ru')) LIKE ?", [$like]);
             });
         }
-        if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+        if ($filters->categoryId !== null) {
+            $query->where('category_id', $filters->categoryId);
         }
-        if (array_key_exists('is_new', $filters) && $filters['is_new'] !== null) {
-            $query->where('is_new', $filters['is_new']);
+        if ($filters->isNew !== null) {
+            $query->where('is_new', $filters->isNew);
         }
-        if (array_key_exists('is_hit', $filters) && $filters['is_hit'] !== null) {
-            $query->where('is_hit', $filters['is_hit']);
+        if ($filters->isHit !== null) {
+            $query->where('is_hit', $filters->isHit);
         }
-        if (array_key_exists('is_sale', $filters) && $filters['is_sale'] !== null) {
-            $query->where('is_sale', $filters['is_sale']);
+        if ($filters->isSale !== null) {
+            $query->where('is_sale', $filters->isSale);
         }
 
-        return $query->orderByDesc('is_active')->orderByDesc('id')->paginate($filters['per_page'] ?? 20);
+        return $query->orderByDesc('is_active')->orderByDesc('id')->paginate($filters->perPage);
     }
 
-    public function getPaginated(
-        int     $perPage        = 12,
-        ?string $search         = null,
-        array   $categories     = [],
-        ?float  $priceMin       = null,
-        ?float  $priceMax       = null,
-        array   $outerMaterials  = [],
-        array   $liningMaterials = [],
-        array   $fillings        = [],
-        array   $seasons         = [],
-        array   $lengths         = [],
-        ?bool   $hood            = null,
-        ?bool   $waterproof      = null,
-        array   $colors          = [],
-        array   $sizes           = [],
-    ): LengthAwarePaginator {
+    public function getPaginated(ProductFilters $filters): LengthAwarePaginator
+    {
         $query = $this->withRelations()->where('is_active', true);
 
-        if ($search) {
-            $like = "%{$search}%";
+        if ($filters->search) {
+            $like = "%{$filters->search}%";
             $query->where(function ($q) use ($like) {
                 $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ro')) LIKE ?", [$like])
                   ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(`name`, '$.ru')) LIKE ?", [$like]);
             });
         }
-        if (!empty($categories))    $query->whereIn('category_id', $categories);
-        if ($priceMin !== null)     $query->where('price', '>=', $priceMin);
-        if ($priceMax !== null)     $query->where('price', '<=', $priceMax);
-        if (!empty($outerMaterials))  $query->whereIn('outer_material_id', $outerMaterials);
-        if (!empty($liningMaterials)) $query->whereIn('lining_material_id', $liningMaterials);
-        if (!empty($fillings))        $query->whereIn('filling_id', $fillings);
-        if (!empty($seasons))         $query->whereIn('season', $seasons);
-        if (!empty($lengths))         $query->whereIn('length', $lengths);
-        if ($hood !== null)           $query->where('hood', $hood);
-        if ($waterproof !== null)     $query->where('waterproof', $waterproof);
-        if (!empty($colors))          $query->whereHas('variants', fn($q) => $q->whereIn('color', $colors));
-        if (!empty($sizes))           $query->whereHas('variants', fn($q) => $q->whereIn('size', $sizes));
+        if (!empty($filters->categories))      $query->whereIn('category_id', $filters->categories);
+        if ($filters->priceMin !== null)       $query->where('price', '>=', $filters->priceMin);
+        if ($filters->priceMax !== null)       $query->where('price', '<=', $filters->priceMax);
+        if (!empty($filters->outerMaterials))  $query->whereIn('outer_material_id', $filters->outerMaterials);
+        if (!empty($filters->liningMaterials)) $query->whereIn('lining_material_id', $filters->liningMaterials);
+        if (!empty($filters->fillings))        $query->whereIn('filling_id', $filters->fillings);
+        if (!empty($filters->seasons))         $query->whereIn('season', $filters->seasons);
+        if (!empty($filters->lengths))         $query->whereIn('length', $filters->lengths);
+        if ($filters->hood !== null)           $query->where('hood', $filters->hood);
+        if ($filters->waterproof !== null)     $query->where('waterproof', $filters->waterproof);
+        if (!empty($filters->colors))          $query->whereHas('variants', fn($q) => $q->whereIn('color', $filters->colors));
+        if (!empty($filters->sizes))           $query->whereHas('variants', fn($q) => $q->whereIn('size', $filters->sizes));
 
-        return $query->paginate($perPage);
+        return $query->paginate($filters->perPage);
     }
 
     public function getVariantOptions(): array
@@ -124,13 +116,13 @@ class ProductRepository
 
     public function create(array $data): Product
     {
-        return Product::create($data)->load(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
+        return Product::create($data)->load(self::RELATIONS);
     }
 
     public function update(Product $product, array $data): Product
     {
         $product->update($data);
-        return $product->fresh(['category', 'brand', 'media', 'outerMaterial', 'liningMaterial', 'filling', 'variants.location']);
+        return $product->fresh(self::RELATIONS);
     }
 
     public function delete(Product $product): void

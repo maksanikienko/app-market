@@ -1,28 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProductClassifier;
+use App\Services\ClassifierService;
 use Illuminate\Http\JsonResponse;
+use Spatie\RouteDiscovery\Attributes\Route;
 
 class ClassifierController extends Controller
 {
+    public function __construct(private readonly ClassifierService $classifierService) {}
+
+    #[Route(method: 'GET', name: 'api.products.classifiers.index')]
     public function index(): JsonResponse
     {
         try {
-            $grouped = ProductClassifier::where('is_active', true)
-                ->orderBy('key')
-                ->get()
-                ->map(fn($c) => [
-                    'id'   => $c->id,
-                    'type' => $c->type,
-                    'key'  => $c->key,
-                    'name' => $c->getTranslations('name'),
-                ])
-                ->groupBy('type');
-
-            return response()->json($grouped);
+            return response()->json($this->classifierService->getGroupedClassifiers());
         } catch (\Throwable $e) {
             return $this->handleError($e);
         }

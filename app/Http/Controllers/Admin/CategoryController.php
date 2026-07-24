@@ -7,11 +7,14 @@ use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
+use Spatie\RouteDiscovery\Attributes\Route;
 
+#[Route(middleware: ['auth', 'role:admin'])]
 class CategoryController extends Controller
 {
     public function __construct(public CategoryService $categoryService) {}
 
+    #[Route(method: 'GET', fullUri: 'admin/categories', name: 'api.admin.categories.index')]
     public function index(): JsonResponse
     {
         try {
@@ -21,6 +24,7 @@ class CategoryController extends Controller
         }
     }
 
+    #[Route(method: 'GET', fullUri: 'admin/categories/{category}', name: 'api.admin.categories.show')]
     public function show(Category $category): JsonResponse
     {
         try {
@@ -30,6 +34,7 @@ class CategoryController extends Controller
         }
     }
 
+    #[Route(method: 'POST', fullUri: 'admin/categories', name: 'api.admin.categories.store')]
     public function store(CategoryRequest $request): JsonResponse
     {
         try {
@@ -39,6 +44,7 @@ class CategoryController extends Controller
         }
     }
 
+    #[Route(method: ['PUT', 'PATCH'], fullUri: 'admin/categories/{category}', name: 'api.admin.categories.update')]
     public function update(CategoryRequest $request, Category $category): JsonResponse
     {
         try {
@@ -48,6 +54,7 @@ class CategoryController extends Controller
         }
     }
 
+    #[Route(method: 'DELETE', fullUri: 'admin/categories/{category}', name: 'api.admin.categories.destroy')]
     public function destroy(Category $category): JsonResponse
     {
         try {

@@ -3,26 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Spatie\RouteDiscovery\Attributes\Route;
 
 class CategoryController extends Controller
 {
-    public function __construct(private CategoryService $categoryService) {}
+    public function __construct(private readonly CategoryService $categoryService) {}
 
-    public function index(): JsonResponse
+    #[Route(method: ['GET'], name: 'api.products.categories')]
+    public function index(): AnonymousResourceCollection|JsonResponse
     {
         try {
-            $categories = $this->categoryService->getCategories()->map(fn($c) => [
-                'id'          => $c->id,
-                'slug'        => $c->slug,
-                'name'        => $c->getTranslations('name'),
-                'description' => $c->getTranslations('description'),
-                'is_active'   => $c->is_active,
-                'sort_order'  => $c->sort_order,
-            ]);
-
-            return response()->json($categories);
+            return CategoryResource::collection($this->categoryService->getCategories());
         } catch (\Throwable $e) {
             return $this->handleError($e);
         }

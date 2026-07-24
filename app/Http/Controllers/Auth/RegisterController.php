@@ -8,7 +8,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Spatie\RouteDiscovery\Attributes\DoNotDiscover;
 
+#[DoNotDiscover]
 class RegisterController extends Controller
 {
     public function __construct()

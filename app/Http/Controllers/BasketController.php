@@ -7,9 +7,11 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\RouteDiscovery\Attributes\Route;
 
 class BasketController extends Controller
 {
+    #[Route(method: 'get', name: 'api.basket.index')]
     public function index(): JsonResponse
     {
         try {
@@ -22,6 +24,7 @@ class BasketController extends Controller
         }
     }
 
+    #[Route(method: 'POST', uri: 'add/{id}', name: 'api.basket-add')]
     public function add(Request $request, $productId): JsonResponse
     {
         try {
@@ -66,6 +69,7 @@ class BasketController extends Controller
         }
     }
 
+    #[Route(method: 'POST', uri: 'remove/{id}', name: 'api.basket-remove')]
     public function remove($productId): JsonResponse
     {
         try {
@@ -101,6 +105,7 @@ class BasketController extends Controller
         }
     }
 
+    #[Route(method: 'POST', name: 'api.basket-place')]
     public function place(Request $request): JsonResponse
     {
         try {
@@ -142,6 +147,7 @@ class BasketController extends Controller
         }
     }
 
+    #[Route(method: 'POST', uri: 'update', name: 'api.basket-update')]
     public function update(Request $request): JsonResponse
     {
         try {

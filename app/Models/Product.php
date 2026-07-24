@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MergesTranslatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Product extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasTranslations, SoftDeletes;
+    use HasFactory, InteractsWithMedia, HasTranslations, SoftDeletes, MergesTranslatable;
 
     public array $translatable = ['name', 'description', 'short_description'];
 
@@ -78,15 +79,6 @@ class Product extends Model implements HasMedia
     public function filling(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(ProductClassifier::class, 'filling_id');
-    }
-
-    public function toArray(): array
-    {
-        $arr = parent::toArray();
-        foreach ($this->translatable as $field) {
-            $arr[$field] = $this->getTranslations($field);
-        }
-        return $arr;
     }
 
 //    public function getPriceForCount(): float|int

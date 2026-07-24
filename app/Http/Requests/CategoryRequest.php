@@ -16,7 +16,7 @@ class CategoryRequest extends FormRequest
     {
         if ($this->filled('name') && !$this->filled('slug')) {
             $name = is_array($this->input('name'))
-                ? ($this->input('name.en') ?? $this->input('name.ru') ?? '')
+                ? ($this->input('name.ru') ?? $this->input('name.en') ?? '')
                 : $this->input('name');
             $this->merge(['slug' => Str::slug($name)]);
         }

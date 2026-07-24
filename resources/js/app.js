@@ -4,6 +4,7 @@ import '../css/app.css';
 import axios from 'axios';
 import { createApp } from 'vue';
 import { createPinia } from "pinia";
+import { ZiggyVue } from 'ziggy-js';
 
 import App from './../js/components/App.vue';
 import router from './router';
@@ -17,5 +18,6 @@ axios.get('/sanctum/csrf-cookie').finally(() => {
 
     app.use(pinia);
     app.use(router);
+    app.use(ZiggyVue);
     app.mount('#app');
 });
