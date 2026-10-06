@@ -14,15 +14,15 @@ concurrency:
 env:
   PHP_VERSION: '8.4'
   PHP_EXTENSIONS: mbstring, pdo_mysql, bcmath, intl, gd, exif, zip
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
 
 jobs:
   assets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: assets
           path: public/build
@@ -55,7 +55,7 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: password
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -63,14 +63,14 @@ jobs:
           extensions: ${{ env.PHP_EXTENSIONS }}
           coverage: none
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: vendor
           key: composer-dev-${{ hashFiles('composer.lock') }}
 
       - run: composer install --no-interaction --prefer-dist --no-progress
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: assets
           path: public/build
@@ -90,7 +90,7 @@ jobs:
       DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/var/www/html/app-market' }}
       SSH: ssh -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -100,7 +100,7 @@ jobs:
 
       - run: composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: assets
           path: public/build
