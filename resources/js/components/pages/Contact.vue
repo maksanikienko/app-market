@@ -1,91 +1,50 @@
 <template>
-  <div class="space-y-12 pb-16">
-
-    <!-- Page header -->
-    <section class="space-y-2">
-      <h1 class="text-3xl font-semibold tracking-tight text-stone-900">{{ t('contact.title') }}</h1>
-      <p class="text-stone-500 text-sm max-w-lg">{{ t('contact.subtitle') }}</p>
+  <div class="space-y-10 pb-8">
+    <section class="animate-rise space-y-3">
+      <h1 class="font-display text-4xl md:text-5xl font-semibold leading-none tracking-tight">{{ t('contact.title') }}</h1>
+      <p class="max-w-lg text-muted-foreground">{{ t('contact.subtitle') }}</p>
     </section>
 
-    <!-- Main content -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-
-      <!-- Left: contact blocks -->
-      <div class="space-y-6">
-
-        <!-- Info cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-            <div class="flex items-center gap-2 text-stone-900">
-              <MapPin class="h-4 w-4 shrink-0" />
-              <span class="text-sm font-semibold">{{ t('contact.address.label') }}</span>
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-10">
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Card
+            v-for="(card, i) in cards"
+            :key="card.label"
+            class="animate-rise stagger group gap-0 rounded-2xl p-5 shadow-none transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_rgb(60_40_20/0.25)]"
+            :style="{ '--i': i + 1 }"
+          >
+            <span class="mb-4 grid size-10 place-items-center rounded-xl bg-brand/10 text-brand transition-transform duration-500 ease-spring group-hover:scale-110 group-hover:rotate-[-6deg]">
+              <component :is="card.icon" class="size-5" />
+            </span>
+            <p class="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">{{ t(card.label) }}</p>
+            <a v-if="card.href" :href="card.href" class="mt-1.5 block break-all font-medium transition-colors hover:text-brand">{{ t(card.value) }}</a>
+            <div v-else class="mt-1.5 space-y-0.5 font-medium">
+              <p v-for="line in card.lines" :key="line">{{ t(line) }}</p>
             </div>
-            <p class="text-sm text-stone-600 leading-relaxed">{{ t('contact.address.value') }}</p>
-          </div>
-
-          <div class="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-            <div class="flex items-center gap-2 text-stone-900">
-              <Phone class="h-4 w-4 shrink-0" />
-              <span class="text-sm font-semibold">{{ t('contact.phone.label') }}</span>
-            </div>
-            <a :href="`tel:${phoneRaw}`" class="text-sm text-stone-600 hover:text-stone-900 transition-colors">
-              {{ t('contact.phone.value') }}
-            </a>
-          </div>
-
-          <div class="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-            <div class="flex items-center gap-2 text-stone-900">
-              <Mail class="h-4 w-4 shrink-0" />
-              <span class="text-sm font-semibold">{{ t('contact.email.label') }}</span>
-            </div>
-            <a :href="`mailto:${emailRaw}`" class="text-sm text-stone-600 hover:text-stone-900 transition-colors break-all">
-              {{ t('contact.email.value') }}
-            </a>
-          </div>
-
-          <div class="rounded-xl border border-stone-200 bg-white p-5 space-y-2">
-            <div class="flex items-center gap-2 text-stone-900">
-              <Clock class="h-4 w-4 shrink-0" />
-              <span class="text-sm font-semibold">{{ t('contact.hours.label') }}</span>
-            </div>
-            <div class="text-sm text-stone-600 space-y-0.5">
-              <p>{{ t('contact.hours.weekdays') }}</p>
-              <p>{{ t('contact.hours.weekend') }}</p>
-            </div>
-          </div>
+          </Card>
         </div>
 
-        <!-- How to find us -->
-        <div class="rounded-xl border border-stone-200 bg-white p-5 space-y-3">
-          <h2 class="text-sm font-semibold text-stone-900">{{ t('contact.directions.title') }}</h2>
-          <p class="text-sm text-stone-600 leading-relaxed">{{ t('contact.directions.desc') }}</p>
-        </div>
-
+        <Card class="animate-rise stagger gap-0 rounded-2xl p-5 shadow-none" style="--i: 5">
+          <h2 class="font-display text-xl font-semibold">{{ t('contact.directions.title') }}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ t('contact.directions.desc') }}</p>
+        </Card>
       </div>
 
-      <!-- Right: map -->
-      <div class="rounded-xl overflow-hidden border border-stone-200 bg-stone-100 h-[420px] lg:h-[520px] relative">
-        <!-- Map container -->
-        <div ref="mapEl" class="w-full h-full" />
-
-        <!-- Shown while key is missing -->
-        <div
-          v-if="error"
-          class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-stone-100"
-        >
-          <MapPin class="h-8 w-8 text-stone-300" />
-          <p class="text-sm text-stone-400 text-center px-6">
-            {{ t('contact.map.noKey') }}
-          </p>
+      <div class="animate-rise stagger relative h-[420px] overflow-hidden rounded-3xl border bg-muted lg:h-[540px]" style="--i: 3">
+        <div ref="mapEl" class="size-full" />
+        <div v-if="error" class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+          <MapPin class="size-8 text-muted-foreground/50" />
+          <p class="px-6 text-center text-sm text-muted-foreground">{{ t('contact.map.noKey') }}</p>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
 import { MapPin, Phone, Mail, Clock } from 'lucide-vue-next'
+import { Card } from '@/components/ui/card'
 import { useI18n } from '@/i18n'
 import { useGoogleMap } from '@/composables/useGoogleMap.js'
 
@@ -103,4 +62,11 @@ const { mapEl, error } = useGoogleMap({
 // Raw values for href attributes
 const phoneRaw = '+37300000000'
 const emailRaw = 'contact@foryou.md'
+
+const cards = [
+  { icon: MapPin, label: 'contact.address.label', lines: ['contact.address.value'] },
+  { icon: Phone,  label: 'contact.phone.label',   value: 'contact.phone.value', href: `tel:${phoneRaw}` },
+  { icon: Mail,   label: 'contact.email.label',   value: 'contact.email.value', href: `mailto:${emailRaw}` },
+  { icon: Clock,  label: 'contact.hours.label',   lines: ['contact.hours.weekdays', 'contact.hours.weekend'] },
+]
 </script>

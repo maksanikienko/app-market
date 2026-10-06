@@ -1,26 +1,27 @@
 <template>
-  <section class="flex flex-col items-center justify-center text-center gap-6 py-24 select-none">
-    <p class="font-display font-light text-7xl md:text-8xl tracking-[0.2em] text-stone-300">404</p>
+  <section class="relative flex flex-col items-center justify-center gap-6 overflow-hidden py-24 text-center select-none">
+    <div class="pointer-events-none absolute top-10 size-72 rounded-full bg-brand/20 blur-3xl" />
+    <p class="animate-rise relative font-display text-[9rem] md:text-[12rem] font-semibold italic leading-none tracking-tight text-foreground/10">404</p>
 
-    <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight text-stone-900">{{ t('notFound.title') }}</h1>
-      <p class="text-sm text-stone-600 max-w-sm">{{ t('notFound.hint') }}</p>
+    <div class="animate-rise stagger relative -mt-16 space-y-2" style="--i: 1">
+      <h1 class="font-display text-3xl md:text-4xl font-semibold tracking-tight">{{ t('notFound.title') }}</h1>
+      <p class="max-w-sm text-muted-foreground">{{ t('notFound.hint') }}</p>
     </div>
 
-    <div class="flex flex-wrap justify-center gap-3">
-      <RouterLink
-        to="/"
-        class="bg-stone-900 text-white hover:bg-stone-700 rounded-lg px-6 py-2.5 text-sm font-semibold transition-colors"
-      >{{ t('notFound.home') }}</RouterLink>
-      <RouterLink
-        to="/products"
-        class="text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg px-6 py-2.5 text-sm font-medium transition-colors"
-      >{{ t('notFound.catalog') }}</RouterLink>
+    <div class="animate-rise stagger relative flex flex-wrap justify-center gap-3" style="--i: 2">
+      <Button size="lg" class="rounded-full" as-child>
+        <RouterLink :to="{ name: 'home' }"><House /> {{ t('notFound.home') }}</RouterLink>
+      </Button>
+      <Button size="lg" variant="outline" class="rounded-full" as-child>
+        <RouterLink :to="{ name: 'products' }">{{ t('notFound.catalog') }} <ArrowRight /></RouterLink>
+      </Button>
     </div>
   </section>
 </template>
 
 <script setup>
+import { House, ArrowRight } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
 
 const { t } = useI18n()

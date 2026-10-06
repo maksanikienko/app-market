@@ -1,163 +1,106 @@
 <template>
   <article
-    class="group bg-white rounded-xl overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-lg hover:border flex flex-col"
-    @click="$router.push(`/product/${product.id}`)"
+    class="group relative flex h-full cursor-pointer flex-col gap-3"
+    @click="$router.push({ name: 'product-detail', params: { id: product.id } })"
   >
     <!-- Image -->
-    <div class="relative aspect-square overflow-hidden bg-stone-100">
-      <img
-        v-if="product.media_items?.length"
-        :src="product.media_items[0]?.thumb_url"
-        :alt="localeStore.t(product.name)"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      <div v-else class="w-full h-full flex items-center justify-center">
-        <Package class="h-10 w-10 text-stone-300" />
+    <div class="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted ring-1 ring-black/[0.03] transition-shadow duration-500 group-hover:shadow-[0_20px_40px_-20px_rgb(60_40_20/0.35)]">
+      <template v-if="images.length">
+        <img
+          :src="images[0].thumb_url"
+          :alt="localeStore.t(product.name)"
+          loading="lazy"
+          class="absolute inset-0 size-full object-cover transition-all duration-700 ease-out-expo group-hover:scale-105"
+          :class="images[1] && 'group-hover:opacity-0'"
+        />
+        <img
+          v-if="images[1]"
+          :src="images[1].thumb_url"
+          alt=""
+          loading="lazy"
+          class="absolute inset-0 size-full scale-110 object-cover opacity-0 transition-all duration-700 ease-out-expo group-hover:scale-100 group-hover:opacity-100"
+        />
+      </template>
+      <div v-else class="flex size-full items-center justify-center">
+        <Package class="size-10 text-muted-foreground/40" />
       </div>
 
-      <!-- Badges -->
-      <div class="absolute top-3 left-3 flex flex-col gap-1">
-        <Badge v-if="product.is_new"  class="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 bg-blue-500/50 text-white">{{ t('product.badge.new') }}</Badge>
-        <Badge v-if="product.is_hit"  class="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 bg-amber-500/50 text-white">{{ t('product.badge.hit') }}</Badge>
-        <Badge v-if="product.is_sale" class="text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 bg-rose-500/50 text-white">{{ t('product.badge.sale') }}</Badge>
-      </div>
+      <ProductBadges :product="product" class="absolute left-3 top-3" />
 
-      <!-- Quick add — slides up on hover -->
-      <div class="absolute inset-x-0 bottom-0 p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
-        <button
-          @click.stop="handleAdd"
+      <!-- Quick add -->
+      <div class="absolute inset-x-3 bottom-3 translate-y-[calc(100%+1rem)] opacity-0 transition-all duration-500 ease-out-expo group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100 max-md:inset-x-auto max-md:right-2 max-md:bottom-2">
+        <Button
           :disabled="inCart || adding"
-          :class="[
-            'w-full py-2.5 text-xs font-semibold uppercase tracking-widest rounded-lg transition-colors duration-200',
-            inCart
-              ? 'bg-stone-200 text-stone-500 cursor-default'
-              : 'bg-white/95 backdrop-blur-sm text-stone-900 hover:bg-stone-900 hover:text-white'
-          ]"
+          size="lg"
+          class="w-full rounded-xl bg-background/80 text-foreground shadow-lg backdrop-blur-md hover:bg-primary hover:text-primary-foreground max-md:size-10 max-md:rounded-full max-md:p-0"
+          :class="inCart && 'opacity-100! bg-success text-white'"
+          @click.stop="handleAdd"
         >
-          <span v-if="inCart" class="flex items-center justify-center gap-1.5">
-            <Check class="h-3.5 w-3.5" /> {{ t('card.added') }}
-          </span>
-          <span v-else-if="adding" class="flex items-center justify-center gap-1.5">
-            <Loader2 class="h-3.5 w-3.5 animate-spin" />
-          </span>
-          <span v-else>{{ t('card.add') }}</span>
-        </button>
+          <Check v-if="inCart" class="animate-pop" />
+          <Loader2 v-else-if="adding" class="animate-spin" />
+          <Plus v-else />
+          <span class="max-md:sr-only">{{ inCart ? t('card.added') : t('card.add') }}</span>
+        </Button>
       </div>
     </div>
 
     <!-- Info -->
-    <div class="p-4 flex flex-col flex-1 gap-2">
-
-      <!-- Category / brand + color swatches -->
-      <div class="flex justify-between items-center">
-        <p class="text-[10px] font-medium uppercase tracking-widest text-stone-400 truncate">
+    <div class="flex flex-1 flex-col gap-1 px-0.5">
+      <div class="flex items-center justify-between gap-2">
+        <p class="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           {{ product.brand?.name ?? localeStore.t(product.category?.name) ?? '' }}
         </p>
-        <div v-if="colors.length" class="flex items-center flex-wrap gap-0.5 shrink-0 ml-2">
+        <div v-if="colors.length" class="flex shrink-0 items-center -space-x-1">
           <span
             v-for="c in colors.slice(0, MAX_SWATCHES)"
             :key="c.hex"
-            class="w-3 h-3 rounded-full border border-stone-200 shrink-0"
+            class="size-3.5 rounded-full ring-2 ring-background transition-transform duration-300 group-hover:translate-x-0"
             :style="{ backgroundColor: c.hex }"
           />
-          <span v-if="colors.length > MAX_SWATCHES" class="text-[10px] text-stone-400 leading-none">
-            +{{ colors.length - MAX_SWATCHES }}
-          </span>
+          <span v-if="colors.length > MAX_SWATCHES" class="pl-2 text-[10px] text-muted-foreground">+{{ colors.length - MAX_SWATCHES }}</span>
         </div>
       </div>
 
-      <!-- Name with tooltip -->
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger as-child>
-            <h3 class="text-sm font-medium text-stone-900 leading-snug line-clamp-2 text-left cursor-default">
-              {{ localeStore.t(product.name) }}
-            </h3>
-          </TooltipTrigger>
-          <TooltipContent side="top" class="max-w-56 text-center text-xs">
-            {{ localeStore.t(product.name) }}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <h3 class="line-clamp-2 text-sm font-medium leading-snug transition-colors group-hover:text-brand" :title="localeStore.t(product.name)">
+        {{ localeStore.t(product.name) }}
+      </h3>
 
-      <!-- Price — always at bottom -->
-      <div class="flex items-baseline gap-2 mt-auto pt-1">
-        <span class="text-base font-semibold text-stone-900">{{ formatPrice(product.price) }}</span>
-        <span v-if="product.old_price" class="text-xs line-through text-stone-400">
-          {{ formatPrice(product.old_price) }}
-        </span>
+      <div class="mt-auto flex items-baseline gap-2 pt-1">
+        <span class="text-base font-semibold tabular-nums" :class="product.old_price && 'text-brand'">{{ formatPrice(product.price) }}</span>
+        <span v-if="product.old_price" class="text-xs tabular-nums text-muted-foreground line-through">{{ formatPrice(product.old_price) }}</span>
       </div>
-
     </div>
   </article>
 
-  <!-- Variant selector dialog -->
+  <!-- Variant selector -->
   <Dialog v-model:open="selectorOpen">
-    <DialogContent class="sm:max-w-xs">
-      <DialogHeader>
-        <DialogTitle class="text-sm font-semibold leading-snug line-clamp-2">
-          {{ localeStore.t(product.name) }}
-        </DialogTitle>
+    <DialogContent class="sm:max-w-sm rounded-2xl">
+      <DialogHeader class="flex-row items-center gap-3 space-y-0 text-left">
+        <img v-if="images.length" :src="images[0].thumb_url" alt="" class="size-14 rounded-xl object-cover" />
+        <div class="min-w-0">
+          <DialogTitle class="line-clamp-2 text-base leading-snug">{{ localeStore.t(product.name) }}</DialogTitle>
+          <DialogDescription class="mt-1 font-semibold text-foreground">{{ formatPrice(variant?.price ?? product.price) }}</DialogDescription>
+        </div>
       </DialogHeader>
 
-      <div class="space-y-5 pt-1">
-        <!-- Colors -->
+      <div class="space-y-5 pt-2">
         <div v-if="hasColors" class="space-y-2.5">
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-600">
-              {{ t('filter.color') }}
-            </span>
-            <span v-if="selectedColor" class="text-xs text-stone-500">
-              {{ localeStore.t(selectedColorName) }}
-            </span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="c in colors"
-              :key="c.hex"
-              type="button"
-              @click="selectColor(c.hex)"
-              class="w-7 h-7 rounded-full transition-all duration-150"
-              :class="selectedColor === c.hex
-                ? 'ring-2 ring-stone-900 ring-offset-2'
-                : 'ring-1 ring-stone-200 hover:ring-stone-400'"
-              :style="{ backgroundColor: c.hex }"
-            />
-          </div>
+          <p class="text-xs font-medium text-muted-foreground">
+            {{ t('filter.color') }}<span v-if="selectedColor" class="text-foreground">: {{ localeStore.t(selectedColorName) }}</span>
+          </p>
+          <ColorSwatches :colors="colors" :model-value="selectedColor" @update:model-value="selectColor" />
         </div>
 
-        <!-- Sizes -->
         <div v-if="availableSizes.length" class="space-y-2.5">
-          <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-600">
-            {{ t('filter.size') }}
-          </span>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="size in availableSizes"
-              :key="size"
-              type="button"
-              @click="selectSize(size)"
-              class="min-w-[2.5rem] px-3 py-1.5 text-xs font-medium border rounded-md transition-colors duration-150"
-              :class="selectedSize === size
-                ? 'bg-stone-900 text-white border-stone-900'
-                : 'border-stone-200 text-stone-600 hover:border-stone-900 hover:text-stone-900'"
-            >{{ size }}</button>
-          </div>
+          <p class="text-xs font-medium text-muted-foreground">{{ t('filter.size') }}</p>
+          <SizePicker :sizes="availableSizes" :model-value="selectedSize" @update:model-value="selectSize" />
         </div>
 
-        <button
-          @click="addToCartWithVariant"
-          :disabled="!variant || adding"
-          class="w-full py-3 text-xs font-semibold uppercase tracking-widest rounded-lg transition-colors duration-200"
-          :class="variant && !adding
-            ? 'bg-stone-900 text-white hover:bg-stone-700'
-            : 'bg-stone-100 text-stone-400 cursor-not-allowed'"
-        >
-          <span v-if="adding" class="flex items-center justify-center gap-2">
-            <Loader2 class="h-3.5 w-3.5 animate-spin" /> {{ t('product.adding') }}
-          </span>
-          <span v-else>{{ t('card.add') }}</span>
-        </button>
+        <Button size="lg" class="w-full rounded-xl" :disabled="!variant || adding" @click="addToCartWithVariant">
+          <Loader2 v-if="adding" class="animate-spin" />
+          <ShoppingBag v-else />
+          {{ adding ? t('product.adding') : t('card.add') }}
+        </Button>
       </div>
     </DialogContent>
   </Dialog>
@@ -165,18 +108,20 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { Package, Check, Loader2 } from 'lucide-vue-next';
+import { Package, Check, Loader2, Plus, ShoppingBag } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import { useCartStore } from '@/store/cartStore.js';
 import { useLocaleStore } from '@/store/localeStore.js';
 import { useI18n } from '@/i18n';
 import { useVariantPicker } from '@/composables/useVariantPicker.js';
 import { formatPrice } from '@/lib/format.js';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ProductBadges from '@/components/parts/ProductBadges.vue';
+import ColorSwatches from '@/components/parts/ColorSwatches.vue';
+import SizePicker from '@/components/parts/SizePicker.vue';
 
-const MAX_SWATCHES = 8;
+const MAX_SWATCHES = 5;
 
 const props = defineProps({ product: { type: Object, required: true } });
 
@@ -190,6 +135,7 @@ const {
   selectColor, selectSize, reset,
 } = useVariantPicker(() => props.product.variants);
 
+const images       = computed(() => props.product.media_items ?? []);
 const inCart       = computed(() => cartStore.itemIds.has(props.product.id));
 const hasVariants  = computed(() => (props.product.variants?.length ?? 0) > 0);
 const selectorOpen = ref(false);

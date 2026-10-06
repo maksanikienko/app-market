@@ -10,8 +10,18 @@
     <meta name="keywords" content="haine femei, jachete femei, paltoane femei, modă Moldova, îmbrăcăminte feminină, FORYOU">
     <meta name="author" content="FORYOU">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#1c1917">
-    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f3eee8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#16120f" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
+
+    {{-- Apply the saved theme before first paint (key used by useDark() from @vueuse/core) --}}
+    <script>
+        (() => {
+            const saved = localStorage.getItem('vueuse-color-scheme');
+            const dark = saved === 'dark' || ((!saved || saved === 'auto') && matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', dark);
+        })();
+    </script>
 
     <!-- Canonical -->
     <link rel="canonical" href="{{ config('app.url') }}">

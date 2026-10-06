@@ -18,10 +18,7 @@ const initialFilters = () => ({
 });
 
 export const useFilterStore = defineStore('filter', {
-    state: () => ({
-        ...initialFilters(),
-        mobileFilterOpen: false,
-    }),
+    state: initialFilters,
 
     actions: {
         toggle(key, value) {
@@ -39,8 +36,11 @@ export const useFilterStore = defineStore('filter', {
             this.priceRange.max = max ? parseFloat(max) : null;
         },
 
-        openMobileFilter()  { this.mobileFilterOpen = true; },
-        closeMobileFilter() { this.mobileFilterOpen = false; },
+        // Sidebar category navigation: select only this category, or clear it if it is the only one
+        selectCategory(id) {
+            const isOnly = this.selectedCategories.length === 1 && this.selectedCategories[0] === id;
+            this.selectedCategories = isOnly ? [] : [id];
+        },
 
         reset() {
             Object.assign(this, initialFilters());

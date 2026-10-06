@@ -1,12 +1,12 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-4 py-8 select-none">
-    <Card class="w-full max-w-md">
+  <div class="animate-rise w-full max-w-md select-none">
+    <Card class="border-0 bg-transparent shadow-none">
       <CardHeader class="space-y-2">
-        <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
+        <RouterLink :to="{ name: 'home' }" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
           <ArrowLeft class="h-3.5 w-3.5" />
           {{ t('auth.home') }}
         </RouterLink>
-        <CardTitle class="text-2xl">{{ t('auth.register.title') }}</CardTitle>
+        <CardTitle class="font-display text-4xl font-semibold tracking-tight">{{ t('auth.register.title') }}</CardTitle>
         <CardDescription>{{ t('auth.register.subtitle') }}</CardDescription>
       </CardHeader>
 
@@ -33,7 +33,7 @@
             <Input id="confirmPassword" type="password" placeholder="••••••••" v-model="form.confirmPassword" required />
           </div>
 
-          <Button type="submit" class="w-full" :disabled="isLoading">
+          <Button type="submit" size="lg" class="h-11 w-full rounded-full" :disabled="isLoading">
             <UserPlus class="h-4 w-4 mr-2" />
             {{ isLoading ? t('auth.register.submitting') : t('auth.register.submit') }}
           </Button>
@@ -44,7 +44,7 @@
         <Separator />
         <p class="text-sm text-center text-muted-foreground">
           {{ t('auth.register.haveAccount') }}
-          <RouterLink to="/login" class="text-primary hover:underline font-semibold">
+          <RouterLink :to="{ name: 'login' }" class="font-semibold text-brand hover:underline underline-offset-4">
             {{ t('auth.register.toLogin') }}
           </RouterLink>
         </p>
@@ -92,7 +92,7 @@ const submit = async () => {
 
     if (success) {
       toast.success(t('auth.register.success'))
-      await router.push('/')
+      await router.push({ name: 'home' })
     } else {
       toast.error(userStore.errors.message || t('auth.register.error'))
     }

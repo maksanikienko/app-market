@@ -1,12 +1,12 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-4 py-8 select-none">
-    <Card class="w-full max-w-md">
+  <div class="animate-rise w-full max-w-md select-none">
+    <Card class="border-0 bg-transparent shadow-none">
       <CardHeader class="space-y-2">
-        <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
+        <RouterLink :to="{ name: 'home' }" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
           <ArrowLeft class="h-3.5 w-3.5" />
           {{ t('auth.home') }}
         </RouterLink>
-        <CardTitle class="text-2xl">{{ t('auth.login.title') }}</CardTitle>
+        <CardTitle class="font-display text-4xl font-semibold tracking-tight">{{ t('auth.login.title') }}</CardTitle>
         <CardDescription>{{ t('auth.login.subtitle') }}</CardDescription>
       </CardHeader>
 
@@ -23,11 +23,11 @@
           </div>
 
           <label class="flex items-center gap-2 cursor-pointer text-sm">
-            <input type="checkbox" v-model="form.remember" class="h-4 w-4" />
+            <Checkbox v-model="form.remember" />
             <span>{{ t('auth.login.remember') }}</span>
           </label>
 
-          <Button type="submit" class="w-full" :disabled="isLoading">
+          <Button type="submit" size="lg" class="h-11 w-full rounded-full" :disabled="isLoading">
             <LogIn class="h-4 w-4 mr-2" />
             {{ isLoading ? t('auth.login.submitting') : t('auth.login.submit') }}
           </Button>
@@ -35,11 +35,11 @@
           <div class="relative">
             <Separator />
             <span class="absolute inset-0 flex items-center justify-center">
-              <span class="bg-card px-2 text-xs text-muted-foreground">{{ t('auth.or') }}</span>
+              <span class="bg-background px-2 text-xs text-muted-foreground">{{ t('auth.or') }}</span>
             </span>
           </div>
 
-          <Button variant="outline" type="button" class="w-full" @click="loginWithGoogle">
+          <Button variant="outline" type="button" size="lg" class="h-11 w-full rounded-full" @click="loginWithGoogle">
             <Chrome class="h-4 w-4 mr-2" />
             {{ t('auth.google') }}
           </Button>
@@ -50,7 +50,7 @@
         <Separator />
         <p class="text-sm text-center text-muted-foreground">
           {{ t('auth.login.noAccount') }}
-          <RouterLink to="/register" class="text-primary hover:underline font-semibold">
+          <RouterLink :to="{ name: 'register' }" class="font-semibold text-brand hover:underline underline-offset-4">
             {{ t('auth.login.toRegister') }}
           </RouterLink>
         </p>
@@ -69,6 +69,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'vue-sonner';
 import { LogIn, Chrome, ArrowLeft } from 'lucide-vue-next';
 
@@ -93,7 +94,7 @@ const submit = async () => {
   try {
     if (await userStore.login(form)) {
       toast.success(t('auth.login.success'));
-      await router.push('/');
+      await router.push({ name: 'home' });
     } else {
       toast.error(userStore.errors.message || t('auth.login.error'));
     }

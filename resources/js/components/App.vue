@@ -1,10 +1,11 @@
 <template>
-  <div class="bg-gray-50/50">
-    <Toaster position="top-right" rich-colors />
-    <router-view />
-  </div>
+  <Toaster position="top-right" rich-colors close-button :theme="isDark ? 'dark' : 'light'" />
+  <router-view />
 </template>
 
 <script setup>
+import { useDark } from '@vueuse/core'
 import { Toaster } from '@/components/ui/sonner'
+
+const isDark = useDark()
 </script>

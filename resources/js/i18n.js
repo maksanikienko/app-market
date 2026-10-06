@@ -6,6 +6,7 @@ const ui = {
   'notFound.hint':    { ru: 'Возможно, ссылка устарела или адрес введён с ошибкой.', ro: 'Este posibil ca linkul să fie expirat sau adresa să fie greșită.' },
   'notFound.home':    { ru: 'На главную',                                  ro: 'Acasă' },
   'notFound.catalog': { ru: 'Перейти в каталог',                           ro: 'Vezi catalogul' },
+  'notFound.crumb':   { ru: 'Не найдено',                                  ro: 'Negăsit' },
 
   // Navigation
   'nav.home':     { ru: 'Главная',               ro: 'Acasă' },
@@ -16,6 +17,19 @@ const ui = {
   'nav.admin':    { ru: 'Панель администратора', ro: 'Panou admin' },
   'nav.logout':   { ru: 'Выйти',                 ro: 'Ieșire' },
   'nav.profile':  { ru: 'Мои заказы',            ro: 'Comenzile mele' },
+  'nav.product':  { ru: 'Товар',                 ro: 'Produs' },
+  'nav.cart':     { ru: 'Корзина',               ro: 'Coș' },
+  'nav.menu':     { ru: 'Меню',                  ro: 'Meniu' },
+  'nav.categories': { ru: 'Категории',           ro: 'Categorii' },
+  'nav.guest':    { ru: 'Гость',                 ro: 'Oaspete' },
+  'nav.guestHint':{ ru: 'Войдите, чтобы видеть заказы', ro: 'Autentifică-te pentru comenzi' },
+  'nav.tagline':  { ru: 'Верхняя одежда',        ro: 'Îmbrăcăminte' },
+  'nav.toggleSidebar': { ru: 'Показать / скрыть панель', ro: 'Arată / ascunde panoul' },
+  'nav.theme':    { ru: 'Сменить тему',          ro: 'Schimbă tema' },
+
+  // Footer
+  'footer.rights':  { ru: 'Все права защищены.', ro: 'Toate drepturile rezervate.' },
+  'footer.madeFor': { ru: 'Создано для тепла и стиля', ro: 'Creat pentru căldură și stil' },
 
   // Contact page
   'contact.title':    { ru: 'Контакты',                                          ro: 'Contacte' },
@@ -46,6 +60,12 @@ const ui = {
   'home.store.name':    { ru: 'Магазин верхней женской одежды',                        ro: 'Magazin de îmbrăcăminte caldă pentru femei' },
   'home.store.tagline': { ru: 'Куртки, пальто, шубы и жилеты — всё для тепла и стиля', ro: 'Jachete, paltoane, blănuri și veste — tot pentru căldură și stil' },
   'home.store.cta':     { ru: 'Смотреть каталог',                                      ro: 'Vezi catalogul' },
+  'home.store.eyebrow': { ru: 'Новая коллекция · Осень — Зима',                          ro: 'Colecție nouă · Toamnă — Iarnă' },
+  'home.store.contact': { ru: 'Как нас найти',                                         ro: 'Cum ne găsiți' },
+
+  // Home — Closing banner
+  'home.banner.title': { ru: 'Тепло, которое вам к лицу',                         ro: 'Căldura care ți se potrivește' },
+  'home.banner.text':  { ru: 'Подберите модель по сезону, длине и материалу — фильтры в каталоге помогут найти идеальную вещь.', ro: 'Alege modelul după sezon, lungime și material — filtrele din catalog te ajută să găsești piesa perfectă.' },
 
   // Home — Categories
   'home.cats.title':   { ru: 'По категориям', ro: 'Pe categorii' },
@@ -74,6 +94,8 @@ const ui = {
   'product.addToCart':      { ru: 'В корзину',   ro: 'Adaugă în coș' },
   'product.adding':         { ru: 'Добавляем...', ro: 'Se adaugă...' },
   'product.added':          { ru: 'Добавлен',    ro: 'Adăugat' },
+  'product.specs':          { ru: 'Характеристики',    ro: 'Caracteristici' },
+  'product.not_in_stock':   { ru: 'Нет в наличии',     ro: 'Stoc epuizat' },
   'product.spec.article':   { ru: 'Артикул',           ro: 'Articol' },
   'product.spec.season':    { ru: 'Сезон',             ro: 'Sezon' },
   'product.spec.length':    { ru: 'Длина',             ro: 'Lungime' },
@@ -100,6 +122,7 @@ const ui = {
   'cart.placed.title':    { ru: 'Заказ оформлен!',   ro: 'Comandă plasată!' },
   'cart.error.update':    { ru: 'Не удалось изменить количество', ro: 'Nu s-a putut modifica cantitatea' },
   'cart.error.remove':    { ru: 'Не удалось удалить товар',       ro: 'Nu s-a putut elimina produsul' },
+  'cart.items':           { ru: 'шт. в корзине',     ro: 'articole în coș' },
   'cart.continue':        { ru: 'Продолжить покупки', ro: 'Continuă cumpărăturile' },
   'cart.summary':         { ru: 'Итого',             ro: 'Sumar' },
   'cart.subtotal':        { ru: 'Подытог:',          ro: 'Subtotal:' },
@@ -139,6 +162,7 @@ const ui = {
   'filter.size':       { ru: 'Размер',              ro: 'Mărime' },
   'filter.apply':      { ru: 'Применить',           ro: 'Aplică' },
   'filter.open':       { ru: 'Фильтры',             ro: 'Filtre' },
+  'filter.allCategories': { ru: 'Все категории',     ro: 'Toate categoriile' },
 
   // ProductCard
   'card.add':   { ru: 'В корзину', ro: 'În coș' },

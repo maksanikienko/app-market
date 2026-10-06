@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 w-full">
     <div class="flex items-center gap-3">
-      <Button variant="ghost" size="sm" @click="router.push('/admin/categories')">← Назад</Button>
+      <Button variant="ghost" size="sm" @click="router.push({ name: 'admin-categories' })">← Назад</Button>
       <h1 class="text-2xl font-semibold">{{ id ? 'Редактировать категорию' : 'Новая категория' }}</h1>
     </div>
 
@@ -49,7 +49,7 @@
 
             <div class="flex gap-2 pt-2">
               <Button type="submit" :disabled="saving">{{ saving ? 'Сохранение…' : 'Сохранить' }}</Button>
-              <Button type="button" variant="outline" @click="router.push('/admin/categories')">Отмена</Button>
+              <Button type="button" variant="outline" @click="router.push({ name: 'admin-categories' })">Отмена</Button>
             </div>
           </form>
         </CardContent>
@@ -105,7 +105,7 @@ async function submit() {
   if (form.value.imageFile) fd.append('image', form.value.imageFile)
   try {
     props.id ? await update(props.id, fd) : await create(fd)
-    router.push('/admin/categories')
+    router.push({ name: 'admin-categories' })
   } catch (e) {
     if (e.response?.status === 422) errors.value = e.response.data.errors
   } finally {

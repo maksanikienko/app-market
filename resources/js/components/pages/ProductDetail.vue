@@ -1,317 +1,211 @@
 <template>
-  <div v-if="loading" class="space-y-8">
-    <Skeleton class="h-5 w-48" />
-    <div class="grid gap-8 lg:grid-cols-2">
-      <Skeleton class="aspect-square rounded-xl" />
-      <div class="space-y-4">
-        <Skeleton class="h-8 w-3/4" />
-        <Skeleton class="h-5 w-1/2" />
-        <Skeleton class="h-24 w-full" />
-        <Skeleton class="h-12 w-full" />
-      </div>
+  <div v-if="loading" class="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+    <Skeleton class="aspect-[4/5] rounded-3xl" />
+    <div class="space-y-5 pt-4">
+      <Skeleton class="h-5 w-24 rounded-full" />
+      <Skeleton class="h-12 w-3/4" />
+      <Skeleton class="h-8 w-1/3" />
+      <Skeleton class="h-24 w-full rounded-2xl" />
+      <Skeleton class="h-14 w-full rounded-2xl" />
     </div>
   </div>
 
-  <div v-else-if="product" class="space-y-8 select-none">
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-sm">
-      <RouterLink to="/products" class="text-muted-foreground hover:text-foreground transition-colors">
-        {{ t('products.title') }}
-      </RouterLink>
-      <span class="text-muted-foreground">/</span>
-      <span>{{ localeStore.t(product.name) }}</span>
-    </div>
+  <div v-else-if="product" class="space-y-20 select-none">
+    <div class="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
 
-    <div class="grid gap-10 lg:grid-cols-2">
+      <!-- Gallery -->
+      <div class="animate-rise space-y-3 lg:sticky lg:top-24 lg:self-start">
+        <div class="group relative overflow-hidden rounded-3xl bg-muted">
+          <Carousel v-if="images.length" :opts="{ loop: images.length > 1 }" class="w-full" @init-api="onCarouselInit">
+            <CarouselContent class="-ml-0">
+              <CarouselItem v-for="(img, i) in images" :key="img.id" class="pl-0">
+                <div class="relative aspect-[4/5] overflow-hidden">
+                  <!-- Blurred backdrop fills the letterbox with the photo's own colors -->
+                  <img :src="img.thumb_url" alt="" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full scale-125 object-cover opacity-70 blur-2xl saturate-150" />
+                  <img
+                    :src="img.original_url"
+                    :alt="localeStore.t(product.name)"
+                    loading="lazy"
+                    class="relative size-full cursor-zoom-in object-contain transition-transform duration-700 ease-out-expo hover:scale-[1.03]"
+                    @click="openLightbox(i)"
+                    @load="onImageLoad($event, img.id)"
+                  />
+                </div>
+              </CarouselItem>
+            </CarouselContent>
 
-      <!-- ── Gallery ─────────────────────────────────────── -->
-      <div class="space-y-3">
+            <template v-if="images.length > 1">
+              <CarouselPrevious class="bg-background/80 backdrop-blur-md left-4 size-10 border-0 shadow-md md:opacity-0 md:-translate-x-2 transition-all duration-300 md:group-hover:opacity-100 md:group-hover:translate-x-0" />
+              <CarouselNext class="bg-background/80 backdrop-blur-md right-4 size-10 border-0 shadow-md md:opacity-0 md:translate-x-2 transition-all duration-300 md:group-hover:opacity-100 md:group-hover:translate-x-0" />
 
-        <!-- Main Carousel -->
-        <div class="relative group rounded-xl overflow-hidden bg-stone-100 select-none">
-          <template v-if="images.length">
-            <Carousel
-              :opts="{ loop: images.length > 1 }"
-              class="w-full"
-              @init-api="onCarouselInit"
-            >
-              <CarouselContent class="-ml-0">
-                <CarouselItem
+              <!-- Progress dots -->
+              <div class="absolute inset-x-0 bottom-4 z-10 flex justify-center gap-1.5">
+                <button
                   v-for="(img, i) in images"
                   :key="img.id"
-                  class="pl-0"
-                >
-                  <div class="relative aspect-[4/5] sm:aspect-square overflow-hidden">
-                    <!-- Blurred backdrop fills the letterbox with the photo's own colors -->
-                    <img
-                      :src="img.thumb_url"
-                      alt=""
-                      aria-hidden="true"
-                      class="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl saturate-150 opacity-70 pointer-events-none"
-                    />
-                    <img
-                      :src="img.original_url"
-                      :alt="localeStore.t(product.name)"
-                      loading="lazy"
-                      class="relative w-full h-full object-contain cursor-zoom-in"
-                      @click="openLightbox(i)"
-                      @load="onImageLoad($event, img.id)"
-                    />
-                  </div>
-                </CarouselItem>
-              </CarouselContent>
-
-              <template v-if="images.length > 1">
-                <CarouselPrevious class="left-3 bg-white/80 backdrop-blur-sm hover:bg-white border-0 shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
-                <CarouselNext    class="right-3 bg-white/80 backdrop-blur-sm hover:bg-white border-0 shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity" />
-              </template>
-
-              <!-- Counter -->
-              <div
-                v-if="images.length > 1"
-                class="absolute bottom-3 right-3 z-10 text-xs font-medium bg-black/40 text-white px-2.5 py-1 rounded-full pointer-events-none"
-              >
-                {{ activeSlide + 1 }}/{{ images.length }}
+                  :aria-label="`${i + 1}`"
+                  class="h-1.5 rounded-full bg-white/60 transition-all duration-500 ease-out-expo"
+                  :class="i === activeSlide ? 'w-6 bg-white' : 'w-1.5'"
+                  @click="carouselApi?.scrollTo(i)"
+                />
               </div>
+            </template>
+          </Carousel>
 
-            </Carousel>
-          </template>
-
-          <div v-else class="aspect-[4/5] sm:aspect-square flex items-center justify-center">
-            <Package class="h-16 w-16 text-stone-300" />
+          <div v-else class="flex aspect-[4/5] items-center justify-center">
+            <Package class="size-16 text-muted-foreground/40" />
           </div>
+
+          <ProductBadges :product="product" class="absolute left-4 top-4 z-10" />
         </div>
 
         <!-- Thumbnails -->
-        <div v-if="images.length > 1" class="grid grid-cols-5 gap-2">
+        <div v-if="images.length > 1" class="grid grid-cols-5 gap-2.5">
           <button
             v-for="(img, i) in images"
             :key="img.id"
+            class="aspect-square overflow-hidden rounded-xl ring-offset-2 ring-offset-background transition-all duration-300"
+            :class="i === activeSlide ? 'ring-2 ring-brand' : 'opacity-55 hover:opacity-100'"
             @click="carouselApi?.scrollTo(i)"
-            :class="[
-              'aspect-square rounded-lg overflow-hidden transition-all ring-offset-1',
-              i === activeSlide ? 'ring-2 ring-stone-900' : 'opacity-50 hover:opacity-100'
-            ]"
           >
-            <img :src="img.thumb_url" :alt="localeStore.t(product.name)" loading="lazy" class="w-full h-full object-cover" />
+            <img :src="img.thumb_url" :alt="localeStore.t(product.name)" loading="lazy" class="size-full object-cover" />
           </button>
         </div>
-
       </div>
 
-      <!-- ── Product Details ──────────────────────────────── -->
-      <div class="space-y-6">
-        <div>
-          <div class="flex items-center gap-2">
-            <Badge v-if="product.is_new"  class="bg-blue-500/50  text-white">{{ t('product.badge.new') }}</Badge>
-            <Badge v-if="product.is_hit"  class="bg-amber-500/50 text-white">{{ t('product.badge.hit') }}</Badge>
-            <Badge v-if="product.is_sale" class="bg-rose-500/50  text-white">{{ t('product.badge.sale') }}</Badge>
-          </div>
-          <h1 class="text-3xl font-bold mt-1">{{ localeStore.t(product.name) }}</h1>
-          <p v-if="product.short_description" class="text-muted-foreground mt-2">
+      <!-- Details -->
+      <div class="space-y-8">
+        <div class="animate-rise stagger space-y-3" style="--i: 1">
+          <p v-if="product.category" class="text-xs font-medium uppercase tracking-[0.2em] text-brand">
+            {{ localeStore.t(product.category.name) }}
+          </p>
+          <h1 class="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight">{{ localeStore.t(product.name) }}</h1>
+          <p v-if="product.short_description" class="text-muted-foreground leading-relaxed">
             {{ localeStore.t(product.short_description) }}
           </p>
         </div>
 
         <!-- Price -->
-        <div class="border-y py-4 flex items-baseline gap-3">
-          <span class="text-3xl font-bold">{{ formatPrice(displayPrice) }}</span>
-          <span v-if="product.old_price" class="text-xl line-through text-muted-foreground">
-            {{ formatPrice(product.old_price) }}
-          </span>
-          <span v-if="product.old_price" class="text-sm font-medium text-red-500">
-            -{{ Math.round((1 - product.price / product.old_price) * 100) }}%
-          </span>
+        <div class="animate-rise stagger flex flex-wrap items-baseline gap-3" style="--i: 2">
+          <span class="text-3xl font-semibold tabular-nums" :class="product.old_price && 'text-brand'">{{ formatPrice(displayPrice) }}</span>
+          <template v-if="product.old_price">
+            <span class="text-lg tabular-nums text-muted-foreground line-through">{{ formatPrice(product.old_price) }}</span>
+            <Badge class="rounded-full border-0 bg-brand/15 text-brand">
+              -{{ Math.round((1 - product.price / product.old_price) * 100) }}%
+            </Badge>
+          </template>
         </div>
 
+        <Separator />
+
         <!-- Variant selector -->
-        <div v-if="hasColors || hasSizes" class="space-y-4">
-          <div v-if="hasColors" class="space-y-2">
-            <p class="text-sm font-medium" :class="showValidation && !selectedColor ? 'text-destructive' : ''">
+        <div v-if="hasColors || hasSizes" class="animate-rise stagger space-y-6" style="--i: 3">
+          <div v-if="hasColors" class="space-y-3">
+            <p class="text-sm font-medium transition-colors" :class="showValidation && !selectedColor && 'text-destructive'">
               {{ t('product.color') }}:
-              <span class="font-normal" :class="selectedColor ? 'text-foreground' : 'text-muted-foreground'">
-                {{ selectedColor ? localeStore.t(selectedColorName) : '—' }}
+              <span class="font-normal text-muted-foreground">{{ selectedColor ? localeStore.t(selectedColorName) : '—' }}</span>
+            </p>
+            <ColorSwatches :colors="colors" :model-value="selectedColor" size="lg" @update:model-value="toggleColor" />
+          </div>
+
+          <div v-if="hasSizes" class="space-y-3">
+            <p class="text-sm font-medium transition-colors" :class="showValidation && !selectedSize && 'text-destructive'">
+              {{ t('product.size') }}
+            </p>
+            <SizePicker :sizes="availableSizes" :model-value="selectedSize" @update:model-value="toggleSize" />
+          </div>
+
+          <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-150" leave-to-class="opacity-0">
+            <p v-if="showValidation && !isComplete" class="flex items-center gap-2 text-sm text-destructive">
+              <CircleAlert class="size-4" /> {{ t('product.choose_params') }}
+            </p>
+            <p v-else-if="variant" class="flex items-center gap-2 text-sm font-medium" :class="variant.stock > 0 ? 'text-success' : 'text-destructive'">
+              <span class="relative flex size-2">
+                <span v-if="variant.stock > 0" class="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
+                <span class="relative inline-flex size-2 rounded-full" :class="variant.stock > 0 ? 'bg-success' : 'bg-destructive'" />
               </span>
+              {{ variant.stock > 0 ? `${t('product.in_stock')}: ${variant.stock} ${t('product.pcs')}` : t('product.not_in_stock') }}
             </p>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="c in colors" :key="c.hex"
-                type="button"
-                :title="localeStore.t(c.name)"
-                @click="toggleColor(c.hex)"
-                :class="[
-                  'w-8 h-8 rounded-full border-2 transition-all',
-                  selectedColor === c.hex
-                    ? 'border-foreground scale-110 shadow-md'
-                    : 'border-transparent hover:scale-105 hover:border-muted-foreground'
-                ]"
-                :style="{ backgroundColor: c.hex }"
-              />
-            </div>
-          </div>
-
-          <div v-if="hasSizes" class="space-y-2">
-            <p class="text-sm font-medium" :class="showValidation && !selectedSize ? 'text-destructive' : ''">
-              {{ t('product.size') }}:
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="size in availableSizes" :key="size"
-                type="button"
-                @click="toggleSize(size)"
-                :class="[
-                  'min-w-[2.5rem] px-3 py-1.5 text-sm border rounded-md transition-colors',
-                  selectedSize === size
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'hover:border-foreground'
-                ]"
-              >{{ size }}</button>
-            </div>
-          </div>
-
-          <p v-if="showValidation && !isComplete"
-             class="text-sm text-destructive">
-            {{ t('product.choose_params') }}
-          </p>
-
-          <p
-            v-if="variant"
-            class="text-sm font-medium"
-            :class="variant.stock > 0 ? 'text-emerald-600' : 'text-destructive'"
-          >
-            {{ variant.stock > 0
-              ? t('product.in_stock') + ': ' + variant.stock + ' ' + t('product.pcs')
-              : t('product.not_in_stock') }}
-          </p>
+          </Transition>
         </div>
 
         <!-- Quantity + Add to cart -->
-        <div class="space-y-3">
-          <div class="flex items-center gap-4">
-            <span class="text-sm font-medium">{{ t('product.qty') }}</span>
-            <div class="flex items-center border rounded-lg">
-              <Button variant="ghost" size="sm" class="px-3" @click="quantity = Math.max(1, quantity - 1)">
-                <Minus class="h-4 w-4" />
-              </Button>
-              <span class="w-12 text-center text-sm font-medium">{{ quantity }}</span>
-              <Button variant="ghost" size="sm" class="px-3" :disabled="quantity >= maxQuantity" @click="quantity++">
-                <Plus class="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+        <div class="animate-rise stagger flex gap-3" style="--i: 4">
+          <QuantityStepper v-model="quantity" :max="maxQuantity" size="lg" />
 
-          <div class="flex gap-3">
-            <Button size="lg" class="flex-1" @click="addToCart"
-              :disabled="adding || isInCart || variant?.stock === 0"
-              :variant="isInCart ? 'secondary' : 'default'">
-              <Check v-if="isInCart" class="h-5 w-5 mr-2" />
-              <ShoppingCart v-else class="h-5 w-5 mr-2" />
-              {{ adding ? t('product.adding') : isInCart ? t('product.added') : t('product.addToCart') }}
-            </Button>
-            <Button variant="outline" size="lg" class="px-6">
-              <Heart class="h-5 w-5" />
-            </Button>
-          </div>
+          <Button
+            size="lg"
+            class="h-12 flex-1 rounded-full text-sm transition-all duration-300"
+            :variant="isInCart ? 'secondary' : 'default'"
+            :disabled="adding || isInCart || variant?.stock === 0"
+            @click="addToCart"
+          >
+            <Check v-if="isInCart" class="animate-pop" />
+            <Loader2 v-else-if="adding" class="animate-spin" />
+            <ShoppingBag v-else />
+            {{ adding ? t('product.adding') : isInCart ? t('product.added') : t('product.addToCart') }}
+          </Button>
+        </div>
+
+        <!-- Delivery perk -->
+        <div class="animate-rise stagger flex items-center gap-3 rounded-2xl bg-muted/70 p-4 text-sm" style="--i: 5">
+          <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-background"><Truck class="size-5 text-brand" /></span>
+          <span><span class="font-medium">{{ t('product.spec.delivery') }}</span> · <span class="text-muted-foreground">{{ t('product.spec.days') }}</span></span>
         </div>
 
         <!-- Specs -->
-        <div class="border-t pt-4 space-y-2 text-sm">
-          <div v-if="product.code" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.article') }}</span>
-            <span class="font-medium">{{ product.code }}</span>
-          </div>
-          <div v-if="product.season" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.season') }}</span>
-            <span class="font-medium">{{ classifierLabel('season', product.season) }}</span>
-          </div>
-          <div v-if="product.length" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.length') }}</span>
-            <span class="font-medium">{{ classifierLabel('length', product.length) }}</span>
-          </div>
-          <div v-if="product.outer_material" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.outer') }}</span>
-            <span class="font-medium">{{ localeStore.t(product.outer_material.name) }}</span>
-          </div>
-          <div v-if="product.lining_material" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.lining') }}</span>
-            <span class="font-medium">{{ localeStore.t(product.lining_material.name) }}</span>
-          </div>
-          <div v-if="product.filling" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.filling') }}</span>
-            <span class="font-medium">{{ localeStore.t(product.filling.name) }}</span>
-          </div>
-          <div v-if="product.hood" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.hood') }}</span>
-            <span class="font-medium">{{ product.detachable_hood ? t('product.spec.hoodDetach') : t('product.spec.hoodYes') }}</span>
-          </div>
-          <div v-if="product.waterproof" class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.waterproof') }}</span>
-            <span class="font-medium">{{ t('common.yes') }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-muted-foreground">{{ t('product.spec.delivery') }}</span>
-            <span class="font-medium">{{ t('product.spec.days') }}</span>
-          </div>
-        </div>
+        <Accordion type="single" collapsible default-value="specs" class="animate-rise stagger" style="--i: 6">
+          <AccordionItem value="specs">
+            <AccordionTrigger class="text-base font-medium hover:no-underline">{{ t('product.specs') }}</AccordionTrigger>
+            <AccordionContent>
+              <dl class="divide-y text-sm">
+                <div v-for="spec in specs" :key="spec.label" class="flex justify-between gap-4 py-2.5">
+                  <dt class="text-muted-foreground">{{ spec.label }}</dt>
+                  <dd class="text-right font-medium">{{ spec.value }}</dd>
+                </div>
+              </dl>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
 
-    <!-- ── Featured carousel ────────────────────────────── -->
-    <section v-if="featured.length" class="border-t pt-10 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold tracking-tight text-stone-900">
-          {{ t('home.arrivals.title') }}
-        </h2>
-        <RouterLink to="/products" class="text-[10px] uppercase tracking-widest font-medium text-stone-400 hover:text-stone-700 transition-colors">
-          {{ t('home.cats.viewAll') }}
-        </RouterLink>
-      </div>
-
-      <Swiper
-        :modules="[Autoplay]"
-        :autoplay="{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }"
-        :loop="true"
-        :slides-per-view="2.2"
-        :space-between="16"
-        :breakpoints="{
-          640:  { slidesPerView: 3,   spaceBetween: 16 },
-          1024: { slidesPerView: 4,   spaceBetween: 20 },
-          1280: { slidesPerView: 5,   spaceBetween: 20 },
-        }"
-      >
-        <SwiperSlide v-for="p in featured" :key="p.id" class="!h-auto pb-1">
-          <ProductCard :product="p" />
-        </SwiperSlide>
-      </Swiper>
-    </section>
+    <!-- Featured carousel -->
+    <ProductCarousel
+      v-if="featured.length"
+      :products="featured"
+      :eyebrow="t('product.badge.new')"
+      :title="t('home.arrivals.title')"
+    />
   </div>
 
   <!-- Not found -->
-  <div v-else class="flex h-64 items-center justify-center rounded-lg border border-dashed">
-    <div class="text-center space-y-2">
-      <Package class="h-12 w-12 mx-auto text-muted-foreground" />
-      <p class="font-medium">{{ t('product.notFound') }}</p>
-      <RouterLink to="/products">
-        <Button variant="outline" size="sm">{{ t('product.backTo') }}</Button>
-      </RouterLink>
-    </div>
+  <div v-else class="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed py-24 text-center">
+    <Package class="size-12 text-muted-foreground/50" />
+    <p class="font-display text-2xl font-semibold">{{ t('product.notFound') }}</p>
+    <Button variant="outline" class="rounded-full" as-child>
+      <RouterLink :to="{ name: 'products' }"><ArrowLeft /> {{ t('product.backTo') }}</RouterLink>
+    </Button>
   </div>
 </template>
 
 <script setup>
-import 'swiper/css'
 import 'photoswipe/style.css'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Autoplay } from 'swiper/modules'
 import PhotoSwipe from 'photoswipe'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
-import ProductCard from '@/components/parts/ProductCard.vue'
-import { Heart, Minus, Plus, ShoppingCart, Package, Check } from 'lucide-vue-next'
+import ProductBadges from '@/components/parts/ProductBadges.vue'
+import ProductCarousel from '@/components/parts/ProductCarousel.vue'
+import ColorSwatches from '@/components/parts/ColorSwatches.vue'
+import SizePicker from '@/components/parts/SizePicker.vue'
+import QuantityStepper from '@/components/parts/QuantityStepper.vue'
+import { ArrowLeft, Check, CircleAlert, Loader2, Package, ShoppingBag, Truck } from 'lucide-vue-next'
 import { useProductService } from '@/services/productService.js'
 import { useCartStore } from '@/store/cartStore.js'
 import { useClassifierService } from '@/services/classifierService.js'
@@ -397,13 +291,29 @@ const classifierLabel = (type, key) => {
   return item ? localeStore.t(item.name) : key
 }
 
+const specs = computed(() => {
+  const p = product.value
+  if (!p) return []
+  return [
+    p.code            && { label: t('product.spec.article'),    value: p.code },
+    p.season          && { label: t('product.spec.season'),     value: classifierLabel('season', p.season) },
+    p.length          && { label: t('product.spec.length'),     value: classifierLabel('length', p.length) },
+    p.outer_material  && { label: t('product.spec.outer'),      value: localeStore.t(p.outer_material.name) },
+    p.lining_material && { label: t('product.spec.lining'),     value: localeStore.t(p.lining_material.name) },
+    p.filling         && { label: t('product.spec.filling'),    value: localeStore.t(p.filling.name) },
+    p.hood            && { label: t('product.spec.hood'),       value: t(p.detachable_hood ? 'product.spec.hoodDetach' : 'product.spec.hoodYes') },
+    p.waterproof      && { label: t('product.spec.waterproof'), value: t('common.yes') },
+  ].filter(Boolean)
+})
+
+// ColorSwatches / SizePicker emit null when the active option is clicked again
 function toggleColor(hex) {
-  selectColor(selectedColor.value === hex ? null : hex)
+  selectColor(hex)
   showValidation.value = false
 }
 
 function toggleSize(size) {
-  selectSize(selectedSize.value === size ? null : size)
+  selectSize(size)
   showValidation.value = false
 }
 

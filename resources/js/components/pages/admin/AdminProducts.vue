@@ -10,7 +10,7 @@
         >
           🗑 Корзина
         </Button>
-        <Button v-if="!trashed" @click="router.push('/admin/products/create')">+ Новый товар</Button>
+        <Button v-if="!trashed" @click="router.push({ name: 'admin-product-create' })">+ Новый товар</Button>
       </div>
     </div>
 
@@ -115,7 +115,7 @@
               <TableCell>
                 <!-- Normal mode actions -->
                 <div v-if="!trashed" class="flex gap-1">
-                  <Button size="sm" variant="outline" @click="router.push(`/admin/products/${product.id}/edit`)">
+                  <Button size="sm" variant="outline" @click="router.push({ name: 'admin-product-edit', params: { id: product.id } })">
                     Изменить
                   </Button>
                   <Button
