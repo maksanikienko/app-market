@@ -1,0 +1,129 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PHP_VERSION: '8.4'
+  PHP_EXTENSIONS: mbstring, pdo_mysql, bcmath, intl, gd, exif, zip
+  NODE_VERSION: '20'
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assets
+          path: public/build
+          retention-days: 1
+
+  tests:
+    needs: assets
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: password
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-dev-${{ hashFiles('composer.lock') }}
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: assets
+          path: public/build
+
+      - run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan test
+
+  deploy:
+    needs: tests
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/var/www/html/app-market' }}
+      SSH: ssh -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+
+      - run: composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: assets
+          path: public/build
+
+      - name: Package release
+        run: |
+          echo "RELEASE=$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          tar -czf /tmp/release.tar.gz \
+            --exclude=./.git --exclude=./.github --exclude=./node_modules \
+            --exclude=./tests --exclude=./public/hot --exclude=./docker-compose.yml .
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf 'Host *\n  IdentityFile ~/.ssh/id_deploy\n' > ~/.ssh/config
+
+      - name: Upload release
+        run: $SSH "mkdir -p $DEPLOY_PATH/releases && cat > $DEPLOY_PATH/releases/$RELEASE.tar.gz" < /tmp/release.tar.gz
+
+      - name: Activate release
+        run: |
+          $SSH "cat > $DEPLOY_PATH/deploy.sh" < .github/scripts/deploy.sh
+          $SSH "PHP_FPM_SERVICE=${{ vars.PHP_FPM_SERVICE }} bash $DEPLOY_PATH/deploy.sh $DEPLOY_PATH $RELEASE"
