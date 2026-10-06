@@ -1,21 +1,26 @@
-import {defineStore} from "pinia";
-import {useCategoryService} from "./../services/categoryService.js";
+import { defineStore } from 'pinia'
+import { useCategoryService } from '@/services/categoryService.js'
 
-const categoryService = useCategoryService();
+const categoryService = useCategoryService()
+let pending = null
+
 export const useCategoryStore = defineStore('category', {
     state: () => ({
-        categories: [] ,
+        categories: [],
         isLoading: false,
     }),
 
     actions: {
-        async load() {
+        // Idempotent: concurrent callers share one request, loaded data is reused.
+        load() {
+            if (this.categories.length) return Promise.resolve()
+            if (pending) return pending
+
             this.isLoading = true
-            try {
-                this.categories = await categoryService.getCategories()
-            } finally {
-                this.isLoading = false
-            }
+            pending = categoryService.getCategories()
+                .then(categories => { this.categories = categories })
+                .finally(() => { this.isLoading = false; pending = null })
+            return pending
         },
     },
 })

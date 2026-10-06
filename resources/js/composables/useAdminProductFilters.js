@@ -1,34 +1,36 @@
 import { reactive } from 'vue'
 
-export function useAdminProductFilters() {
-    const filters = reactive({
-        code:        '',
-        name:        '',
-        category_id: '',
-        is_new:      null,
-        is_hit:      null,
-        is_sale:     null,
-    })
+const FLAGS = ['is_new', 'is_hit', 'is_sale']
 
-    const reset = () => {
-        filters.code        = ''
-        filters.name        = ''
-        filters.category_id = ''
-        filters.is_new      = null
-        filters.is_hit      = null
-        filters.is_sale     = null
+const initialFilters = () => ({
+    code:        '',
+    name:        '',
+    category_id: '',
+    is_new:      null,
+    is_hit:      null,
+    is_sale:     null,
+})
+
+export function useAdminProductFilters() {
+    const filters = reactive(initialFilters())
+
+    const reset = () => Object.assign(filters, initialFilters())
+
+    // Cycles a flag filter: any → yes → no → any
+    const cycleFlag = (key) => {
+        filters[key] = filters[key] === null ? true : filters[key] ? false : null
     }
 
     const toParams = (page = 1) => {
-        const p = { page }
-        if (filters.code)        p.code        = filters.code
-        if (filters.name)        p.name        = filters.name
-        if (filters.category_id) p.category_id = filters.category_id
-        if (filters.is_new  !== null) p.is_new  = filters.is_new  ? 1 : 0
-        if (filters.is_hit  !== null) p.is_hit  = filters.is_hit  ? 1 : 0
-        if (filters.is_sale !== null) p.is_sale = filters.is_sale ? 1 : 0
-        return p
+        const params = { page }
+        for (const key of ['code', 'name', 'category_id']) {
+            if (filters[key]) params[key] = filters[key]
+        }
+        for (const key of FLAGS) {
+            if (filters[key] !== null) params[key] = filters[key] ? 1 : 0
+        }
+        return params
     }
 
-    return { filters, reset, toParams }
+    return { filters, reset, cycleFlag, toParams }
 }

@@ -23,7 +23,7 @@ import Header from '@/components/layouts/Header.vue';
 import AsidePanel from '@/components/layouts/AsidePanel.vue';
 
 const route     = useRoute();
-const showAside = computed(() => route.path !== '/');
+const showAside = computed(() => !route.meta.hideAside);
 </script>
 
 <style scoped>

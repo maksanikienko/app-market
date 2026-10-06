@@ -1,84 +1,68 @@
-// router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from './../components/pages/Home.vue';
-import Products from './../components/pages/Products.vue';
-import { useUserStore } from "../store/userStore.js";
-import Login from '../../js/components/auth/Login.vue';
-import Register from '../../js/components/auth/Register.vue';
-import ProductDetail from "@/components/pages/ProductDetail.vue";
-import Profile from "@/components/pages/Profile.vue";
-import MainLayout from "@/components/layouts/MainLayout.vue";
-import AuthLayout from "@/components/layouts/AuthLayout.vue";
-import AdminLayout from "@/components/layouts/AdminLayout.vue";
-import AdminProducts from "@/components/pages/admin/AdminProducts.vue";
-import AdminProductForm from "@/components/pages/admin/AdminProductForm.vue";
-import AdminCategories from "@/components/pages/admin/AdminCategories.vue";
-import AdminCategoryForm from "@/components/pages/admin/AdminCategoryForm.vue";
-import AdminOrders from "@/components/pages/admin/AdminOrders.vue";
-import AdminErrors from "@/components/pages/admin/AdminErrors.vue";
-import AdminStock from "@/components/pages/admin/AdminStock.vue";
-import Cart from "@/components/pages/Cart.vue";
-import Contact from "@/components/pages/Contact.vue";
+import { useUserStore } from '@/store/userStore.js';
+import MainLayout from '@/components/layouts/MainLayout.vue';
+import AuthLayout from '@/components/layouts/AuthLayout.vue';
+import Home from '@/components/pages/Home.vue';
 
 const routes = [
     {
         path: '/',
         component: MainLayout,
         children: [
-            { path: '',         component: Home },
-            { path: 'products', component: Products },
-            { path: 'product/:id', component: ProductDetail, props: true },
-            { path: 'profile', component: Profile, meta: { auth: true } },
-            { path: 'cart',    component: Cart },
-            { path: 'contact', component: Contact }
-        ]
+            { path: '',            component: Home, meta: { hideAside: true } },
+            { path: 'products',    component: () => import('@/components/pages/Products.vue') },
+            { path: 'product/:id', component: () => import('@/components/pages/ProductDetail.vue'), props: true },
+            { path: 'profile',     component: () => import('@/components/pages/Profile.vue'), meta: { auth: true } },
+            { path: 'cart',        component: () => import('@/components/pages/Cart.vue') },
+            { path: 'contact',     component: () => import('@/components/pages/Contact.vue') },
+        ],
     },
     {
         path: '/admin',
-        component: AdminLayout,
+        component: () => import('@/components/layouts/AdminLayout.vue'),
         meta: { auth: true, role: 'admin' },
         children: [
-            { path: 'products',             component: AdminProducts },
-            { path: 'products/create',      component: AdminProductForm },
-            { path: 'products/:id/edit',    component: AdminProductForm, props: true },
-            { path: 'categories',             component: AdminCategories },
-            { path: 'categories/create',     component: AdminCategoryForm },
-            { path: 'categories/:id/edit',   component: AdminCategoryForm, props: true },
-            { path: 'orders',               component: AdminOrders },
-            { path: 'errors',               component: AdminErrors },
-            { path: 'stock',                component: AdminStock },
-        ]
+            { path: 'products',            component: () => import('@/components/pages/admin/AdminProducts.vue') },
+            { path: 'products/create',     component: () => import('@/components/pages/admin/AdminProductForm.vue') },
+            { path: 'products/:id/edit',   component: () => import('@/components/pages/admin/AdminProductForm.vue'), props: true },
+            { path: 'categories',          component: () => import('@/components/pages/admin/AdminCategories.vue') },
+            { path: 'categories/create',   component: () => import('@/components/pages/admin/AdminCategoryForm.vue') },
+            { path: 'categories/:id/edit', component: () => import('@/components/pages/admin/AdminCategoryForm.vue'), props: true },
+            { path: 'orders',              component: () => import('@/components/pages/admin/AdminOrders.vue') },
+            { path: 'errors',              component: () => import('@/components/pages/admin/AdminErrors.vue') },
+            { path: 'stock',               component: () => import('@/components/pages/admin/AdminStock.vue') },
+        ],
     },
     {
         path: '/',
         component: AuthLayout,
         children: [
-            { path: 'login', component: Login },
-            { path: 'register', component: Register }
-        ]
-    }
+            { path: 'login',    component: () => import('@/components/auth/Login.vue') },
+            { path: 'register', component: () => import('@/components/auth/Register.vue') },
+        ],
+    },
+    // Must stay last: catches any URL not matched above
+    {
+        path: '/:pathMatch(.*)*',
+        component: MainLayout,
+        children: [
+            { path: '', name: 'not-found', component: () => import('@/components/pages/NotFound.vue'), meta: { hideAside: true } },
+        ],
+    },
 ];
 
 const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
 });
 
 router.beforeEach(async (to) => {
-    const store = useUserStore()
+    const store = useUserStore();
 
-    if (!store.user) {
-        await store.fetchUser()
-    }
+    if (!store.user) await store.fetchUser();
 
-    // Redirect unauthenticated users
-    if (to.meta.auth && !store.user) {
-        return '/login'
-    }
+    if (to.meta.auth && !store.user) return '/login';
+    if (to.meta.role === 'admin' && !store.isAdmin) return '/';
+});
 
-    // Redirect non-admin users trying to access /admin/*
-    if (to.meta.role === 'admin' && !store.isAdmin) {
-        return '/'
-    }
-})
 export default router;

@@ -67,7 +67,7 @@
                           {{ localeStore.t(product.name) }}
                           <span class="text-muted-foreground ml-1">× {{ product.pivot?.count ?? 1 }}</span>
                         </p>
-                        <span>{{product.slug}}</span>
+                        <span>{{ product.slug }}</span>
                         <!-- Variant row -->
                         <div class="flex items-center gap-1.5 mt-0.5">
                           <span
@@ -78,7 +78,7 @@
                           <span
                             v-if="product.pivot?.color"
                             class="text-[10px] text-muted-foreground"
-                          >{{ colorLabel(product.pivot.color) }}</span>
+                          >{{ localeStore.t(product.pivot.color) }}</span>
                           <span
                             v-if="product.pivot?.size"
                             class="text-[10px] font-medium border rounded px-1.5 py-0.5 leading-none text-muted-foreground"
@@ -103,7 +103,7 @@
 
                 <!-- Amount -->
                 <TableCell class="pt-4 text-right">
-                  <span class="font-semibold text-sm">{{ orderAmount(order).toFixed(2) }} lei</span>
+                  <span class="font-semibold text-sm">{{ formatPrice(orderTotal(order)) }}</span>
                 </TableCell>
 
                 <!-- Date -->
@@ -128,33 +128,21 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import axios from 'axios'
+import { onMounted, ref } from 'vue'
 import { Package } from 'lucide-vue-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useLocaleStore } from '@/store/localeStore.js'
+import { useAdminOrderService } from '@/services/adminOrderService.js'
+import { formatPrice, orderTotal } from '@/lib/format.js'
 
 const localeStore = useLocaleStore()
+const { getAll }  = useAdminOrderService()
 const orders  = ref([])
 const loading = ref(false)
 const expanded = ref(new Set())
 
 const PREVIEW_LIMIT = 3
-
-function colorLabel(nameJson) {
-  if (!nameJson) return ''
-  try {
-    const obj = typeof nameJson === 'string' ? JSON.parse(nameJson) : nameJson
-    return localeStore.t(obj)
-  } catch {
-    return nameJson
-  }
-}
-
-function orderAmount(order) {
-  return (order.products ?? []).reduce((sum, p) => sum + parseFloat(p.price) * (p.pivot?.count ?? 1), 0)
-}
 
 function visibleProducts(order) {
   return expanded.value.has(order.id)
@@ -163,11 +151,7 @@ function visibleProducts(order) {
 }
 
 function toggleExpand(id) {
-  if (expanded.value.has(id)) {
-    expanded.value.delete(id)
-  } else {
-    expanded.value.add(id)
-  }
+  expanded.value.has(id) ? expanded.value.delete(id) : expanded.value.add(id)
 }
 
 function pluralItems(n) {
@@ -187,8 +171,7 @@ function formatTime(iso) {
 onMounted(async () => {
   loading.value = true
   try {
-    const { data } = await axios.get('/api/admin/orders')
-    orders.value = data
+    orders.value = await getAll()
   } catch (e) {
     console.error('Failed to load orders', e)
   } finally {

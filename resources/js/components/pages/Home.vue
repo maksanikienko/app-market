@@ -16,10 +16,8 @@
           {{ t('home.store.tagline') }}
         </p>
 
-        <RouterLink to="/products">
-          <button class="mt-1 bg-white text-stone-900 hover:bg-stone-100 rounded-lg px-8 py-3 text-sm font-semibold transition-colors">
-            {{ t('home.store.cta') }}
-          </button>
+        <RouterLink to="/products" class="mt-1 bg-white text-stone-900 hover:bg-stone-100 rounded-lg px-8 py-3 text-sm font-semibold transition-colors">
+          {{ t('home.store.cta') }}
         </RouterLink>
       </div>
     </section>
@@ -33,7 +31,7 @@
         </RouterLink>
       </div>
 
-      <div v-if="categoriesLoading" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div v-if="categoryStore.isLoading" class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Skeleton v-for="i in 6" :key="i" class="aspect-square rounded-xl" />
       </div>
 
@@ -78,9 +76,9 @@
       </div>
 
       <div class="flex justify-center pt-2">
-        <RouterLink to="/products">
-          <Button variant="outline" size="lg">{{ t('home.arrivals.seeAll') }}</Button>
-        </RouterLink>
+        <Button variant="outline" size="lg" as-child>
+          <RouterLink to="/products">{{ t('home.arrivals.seeAll') }}</RouterLink>
+        </Button>
       </div>
     </section>
 
@@ -107,21 +105,14 @@ const { getFeatured } = useProductService();
 
 const featuredProducts = ref([]);
 const productsLoading  = ref(true);
-const categoriesLoading = ref(true);
 
 onMounted(async () => {
-  try {
-    if (categories.value.length === 0) await categoryStore.load();
-  } finally {
-    categoriesLoading.value = false;
-  }
-
+  categoryStore.load();
   try {
     featuredProducts.value = await getFeatured();
   } finally {
     productsLoading.value = false;
   }
 });
-
 
 </script>

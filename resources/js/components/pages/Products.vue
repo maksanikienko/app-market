@@ -31,7 +31,7 @@
             <SlidersHorizontal class="h-3.5 w-3.5" />
             {{ t('filter.open') }}
             <span v-if="filterStore.hasAnyFilter" class="h-4 w-4 bg-stone-900 text-white text-[9px] rounded-full flex items-center justify-center font-semibold leading-none">
-              {{ activeFilterCount }}
+              {{ filterStore.activeCount }}
             </span>
           </Button>
 
@@ -43,7 +43,6 @@
             <SelectContent>
               <SelectItem value="12">12</SelectItem>
               <SelectItem value="24">24</SelectItem>
-<!--              <SelectItem value="48">48</SelectItem>-->
             </SelectContent>
           </Select>
 
@@ -52,7 +51,7 @@
             v-if="filterStore.hasAnyFilter"
             variant="ghost"
             size="sm"
-            @click="clearFilters"
+            @click="filterStore.reset()"
             class="ml-auto sm:ml-0 h-9 px-3 text-xs text-stone-500 hover:text-red-500 hover:bg-red-50"
           >
             <X class="h-3.5 w-3.5" />
@@ -66,18 +65,17 @@
     <div v-if="filterStore.hasAnyFilter" class="flex flex-wrap gap-2">
       <span
         v-for="color in filterStore.colors" :key="`c-${color}`"
-        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-wider font-medium border border-stone-200 rounded-full text-stone-600"
+        class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] uppercase tracking-wider font-medium border border-stone-200 rounded-full text-stone-600"
       >
-        <span class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: colorHex(color) }" />
-        {{ color }}
-        <button @click="filterStore.toggleColor(color)" class="text-stone-400 hover:text-stone-700 ml-0.5">×</button>
+        {{ localeStore.t(color) }}
+        <button @click="filterStore.toggle('colors', color)" class="text-stone-400 hover:text-stone-700">×</button>
       </span>
       <span
         v-for="size in filterStore.sizes" :key="`s-${size}`"
         class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] uppercase tracking-wider font-medium border border-stone-200 rounded-full text-stone-600"
       >
         {{ size }}
-        <button @click="filterStore.toggleSize(size)" class="text-stone-400 hover:text-stone-700">×</button>
+        <button @click="filterStore.toggle('sizes', size)" class="text-stone-400 hover:text-stone-700">×</button>
       </span>
     </div>
 
@@ -112,12 +110,12 @@
         <button
           :disabled="meta.current_page === 1"
           @click="goToPage(1)"
-          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          :class="PAGE_NAV_CLASS"
         ><ChevronsLeft class="h-3.5 w-3.5" /></button>
         <button
           :disabled="meta.current_page === 1"
           @click="goToPage(meta.current_page - 1)"
-          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          :class="PAGE_NAV_CLASS"
         ><ChevronLeft class="h-3.5 w-3.5" /></button>
 
         <button
@@ -134,12 +132,12 @@
         <button
           :disabled="meta.current_page === meta.last_page"
           @click="goToPage(meta.current_page + 1)"
-          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          :class="PAGE_NAV_CLASS"
         ><ChevronRight class="h-3.5 w-3.5" /></button>
         <button
           :disabled="meta.current_page === meta.last_page"
           @click="goToPage(meta.last_page)"
-          class="h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          :class="PAGE_NAV_CLASS"
         ><ChevronsRight class="h-3.5 w-3.5" /></button>
       </div>
     </div>
@@ -157,12 +155,16 @@ import ProductCard from '@/components/parts/ProductCard.vue';
 import { ShoppingBag, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, SlidersHorizontal } from 'lucide-vue-next';
 import { useProductService } from '@/services/productService.js';
 import { useFilterStore } from '@/store/filterStore.js';
+import { useLocaleStore } from '@/store/localeStore.js';
 import { useI18n } from '@/i18n';
 
-const route       = useRoute();
+const PAGE_NAV_CLASS = 'h-8 w-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-500 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors';
+
+const route           = useRoute();
 const { getProducts } = useProductService();
-const filterStore = useFilterStore();
-const { t }       = useI18n();
+const filterStore     = useFilterStore();
+const localeStore     = useLocaleStore();
+const { t }           = useI18n();
 
 const products    = ref([]);
 const loading     = ref(true);
@@ -170,42 +172,14 @@ const searchQuery = ref('');
 const perPage     = ref('12');
 const meta = ref({ current_page: 1, last_page: 1, per_page: 12, total: 0 });
 
-const colorHex = (_name) => '#1c1917';
-
-const activeFilterCount = computed(() =>
-  filterStore.selectedCategories.length +
-  filterStore.outerMaterials.length +
-  filterStore.liningMaterials.length +
-  filterStore.fillings.length +
-  filterStore.seasons.length +
-  filterStore.lengths.length +
-  filterStore.colors.length +
-  filterStore.sizes.length +
-  (filterStore.priceRange.min !== null ? 1 : 0) +
-  (filterStore.priceRange.max !== null ? 1 : 0) +
-  (filterStore.hood !== null ? 1 : 0) +
-  (filterStore.waterproof !== null ? 1 : 0)
-);
-
 const fetchProducts = async (page = 1) => {
   loading.value = true;
   try {
     const result = await getProducts({
+      ...filterStore.query,
       page,
-      perPage:         parseInt(perPage.value),
-      search:          searchQuery.value || undefined,
-      categories:      filterStore.selectedCategories,
-      priceMin:        filterStore.priceRange.min  ?? undefined,
-      priceMax:        filterStore.priceRange.max  ?? undefined,
-      outerMaterials:  filterStore.outerMaterials,
-      liningMaterials: filterStore.liningMaterials,
-      fillings:        filterStore.fillings,
-      seasons:         filterStore.seasons,
-      lengths:         filterStore.lengths,
-      hood:            filterStore.hood,
-      waterproof:      filterStore.waterproof,
-      colors:          filterStore.colors,
-      sizes:           filterStore.sizes,
+      perPage: parseInt(perPage.value),
+      search:  searchQuery.value || undefined,
     });
     products.value = result.data;
     meta.value     = result.meta;
@@ -222,40 +196,21 @@ const goToPage = (page) => {
 };
 
 const visiblePages = computed(() => {
-  const current = meta.value.current_page;
-  const last    = meta.value.last_page;
-  const pages   = [];
+  const { current_page: current, last_page: last } = meta.value;
+  const pages = [];
   for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) pages.push(i);
   return pages;
 });
 
-const debouncedSearch = useDebounceFn(() => fetchProducts(1), 400);
-watch(searchQuery, debouncedSearch);
+watch(searchQuery, useDebounceFn(() => fetchProducts(1), 400));
+watch(() => filterStore.query, () => fetchProducts(1), { deep: true });
 
-watch(
-  () => [
-    filterStore.selectedCategories.slice(),
-    filterStore.priceRange.min,
-    filterStore.priceRange.max,
-    filterStore.outerMaterials.slice(),
-    filterStore.liningMaterials.slice(),
-    filterStore.fillings.slice(),
-    filterStore.seasons.slice(),
-    filterStore.lengths.slice(),
-    filterStore.hood,
-    filterStore.waterproof,
-    filterStore.colors.slice(),
-    filterStore.sizes.slice(),
-  ],
-  () => fetchProducts(1),
-  { deep: true },
-);
-
-onMounted(async () => {
-  if (route.query.category) filterStore.toggleCategory(parseInt(route.query.category));
-  await fetchProducts(1);
+onMounted(() => {
+  const category = parseInt(route.query.category);
+  if (category && !filterStore.selectedCategories.includes(category)) {
+    filterStore.toggle('selectedCategories', category); // the filter watcher triggers the fetch
+  } else {
+    fetchProducts(1);
+  }
 });
-
-
-const clearFilters = () => filterStore.reset();
 </script>

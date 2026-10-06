@@ -5,8 +5,7 @@
       <!-- Logo -->
       <RouterLink
         to="/"
-        class="text-xl tracking-[0.3em] uppercase text-stone-900 hover:text-stone-500 transition-colors"
-        style="font-family: var(--font-display); font-weight: 300;"
+        class="font-display font-light text-xl tracking-[0.3em] uppercase text-stone-900 hover:text-stone-500 transition-colors"
       >
         FORYOU
       </RouterLink>
@@ -14,35 +13,25 @@
       <!-- Nav -->
       <nav class="hidden md:flex gap-8">
         <RouterLink
-          to="/"
+          v-for="link in NAV_LINKS"
+          :key="link.to"
+          :to="link.to"
           class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
-          :class="{ 'text-stone-900 font-medium': $route.path === '/' }"
-        >{{ t('nav.home') }}</RouterLink>
-        <RouterLink
-          to="/products"
-          class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
-          :class="{ 'text-stone-900 font-medium': $route.path === '/products' }"
-        >{{ t('nav.products') }}</RouterLink>
-        <RouterLink
-          to="/contact"
-          class="text-sm text-stone-500 hover:text-stone-900 transition-colors"
-          :class="{ 'text-stone-900 font-medium': $route.path === '/contact' }"
-        >{{ t('nav.contact') }}</RouterLink>
+          :class="{ 'text-stone-900 font-medium': $route.path === link.to }"
+        >{{ t(link.label) }}</RouterLink>
       </nav>
 
       <!-- Actions -->
       <div class="flex items-center gap-1">
 
         <!-- Language switcher -->
-        <div class="flex items-center text-[11px] font-medium tracking-wider mr-2 border border-stone-200 rounded-md overflow-hidden">
+        <div class="flex items-center text-[11px] font-medium tracking-wider mr-2 border border-stone-200 rounded-md overflow-hidden divide-x divide-stone-200">
           <button
-            @click="localeStore.setLocale('ru')"
-            :class="['px-2.5 py-1.5 transition-colors', localeStore.current === 'ru' ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-50']"
-          >RU</button>
-          <button
-            @click="localeStore.setLocale('ro')"
-            :class="['px-2.5 py-1.5 transition-colors border-l border-stone-200', localeStore.current === 'ro' ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-50']"
-          >RO</button>
+            v-for="locale in LOCALES"
+            :key="locale"
+            @click="localeStore.setLocale(locale)"
+            :class="['px-2.5 py-1.5 uppercase transition-colors', localeStore.current === locale ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-50']"
+          >{{ locale }}</button>
         </div>
 
         <!-- Cart -->
@@ -90,24 +79,33 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from './../../store/userStore.js';
-import { useLocaleStore } from './../../store/localeStore.js';
+import { useUserStore } from '@/store/userStore.js';
+import { useLocaleStore } from '@/store/localeStore.js';
+import { useCartStore } from '@/store/cartStore.js';
 import { useI18n } from '@/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ShoppingCart, User } from 'lucide-vue-next';
-import { useCartStore } from './../../store/cartStore.js';
 
-const router = useRouter();
-const userStore = useUserStore();
+const NAV_LINKS = [
+  { to: '/',         label: 'nav.home' },
+  { to: '/products', label: 'nav.products' },
+  { to: '/contact',  label: 'nav.contact' },
+];
+const LOCALES = ['ru', 'ro'];
+
+const router      = useRouter();
+const userStore   = useUserStore();
 const localeStore = useLocaleStore();
-const { t } = useI18n();
+const cartStore   = useCartStore();
+const { t }       = useI18n();
+
 const user = computed(() => userStore.user);
 const initials = computed(() => {
   if (!user.value?.name) return '?'
   return user.value.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 });
-const cartStore = useCartStore();
+
 cartStore.fetchCart();
 
 const navigateTo = (path) => router.push(path);

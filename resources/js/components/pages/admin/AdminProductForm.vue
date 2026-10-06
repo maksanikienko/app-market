@@ -122,21 +122,9 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.is_active" class="rounded" />
-                <span class="text-sm font-medium">Активен</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.is_new" class="rounded" />
-                <span class="text-sm font-medium">Новинка</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.is_hit" class="rounded" />
-                <span class="text-sm font-medium">Хит</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.is_sale" class="rounded" />
-                <span class="text-sm font-medium">Скидка</span>
+              <label v-for="flag in STATUS_FLAGS" :key="flag.key" class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="form[flag.key]" class="rounded" />
+                <span class="text-sm font-medium">{{ flag.label }}</span>
               </label>
             </div>
           </CardContent>
@@ -147,44 +135,18 @@
           <CardHeader><CardTitle>Характеристики одежды</CardTitle></CardHeader>
           <CardContent class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="space-y-1">
-                <Label>Внешний материал *</Label>
-                <Select v-model="form.outer_material_id">
-                  <SelectTrigger :class="inputClass(errors.outer_material_id)">
-                    <SelectValue placeholder="Выберите материал" />
+              <div v-for="field in MATERIAL_FIELDS" :key="field.key" class="space-y-1">
+                <Label>{{ field.label }} *</Label>
+                <Select v-model="form[field.key]">
+                  <SelectTrigger :class="inputClass(errors[field.key])">
+                    <SelectValue :placeholder="field.placeholder" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">— Не указано —</SelectItem>
-                    <SelectItem v-for="c in classifiers.outer_material" :key="c.id" :value="String(c.id)">{{ localeStore.t(c.name) }}</SelectItem>
+                    <SelectItem v-for="c in classifiers[field.classifier]" :key="c.id" :value="String(c.id)">{{ localeStore.t(c.name) }}</SelectItem>
                   </SelectContent>
                 </Select>
-                <FieldError :msgs="fieldMsg(errors, 'outer_material_id')" />
-              </div>
-              <div class="space-y-1">
-                <Label>Подкладка *</Label>
-                <Select v-model="form.lining_material_id">
-                  <SelectTrigger :class="inputClass(errors.lining_material_id)">
-                    <SelectValue placeholder="Выберите подкладку" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">— Не указано —</SelectItem>
-                    <SelectItem v-for="c in classifiers.lining_material" :key="c.id" :value="String(c.id)">{{ localeStore.t(c.name) }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FieldError :msgs="fieldMsg(errors, 'lining_material_id')" />
-              </div>
-              <div class="space-y-1">
-                <Label>Наполнитель *</Label>
-                <Select v-model="form.filling_id">
-                  <SelectTrigger :class="inputClass(errors.filling_id)">
-                    <SelectValue placeholder="Выберите наполнитель" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">— Не указано —</SelectItem>
-                    <SelectItem v-for="c in classifiers.filling" :key="c.id" :value="String(c.id)">{{ localeStore.t(c.name) }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FieldError :msgs="fieldMsg(errors, 'filling_id')" />
+                <FieldError :msgs="fieldMsg(errors, field.key)" />
               </div>
               <div class="space-y-1">
                 <Label>Сезон *</Label>
@@ -215,17 +177,9 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.hood" class="rounded" />
-                <span class="text-sm font-medium">Есть капюшон</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.detachable_hood" class="rounded" />
-                <span class="text-sm font-medium">Съёмный капюшон</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="form.waterproof" class="rounded" />
-                <span class="text-sm font-medium">Водонепроницаемый</span>
+              <label v-for="flag in SPEC_FLAGS" :key="flag.key" class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="form[flag.key]" class="rounded" />
+                <span class="text-sm font-medium">{{ flag.label }}</span>
               </label>
             </div>
           </CardContent>
@@ -256,7 +210,7 @@
                         <span v-if="variant.color_hex"
                               class="inline-block w-3.5 h-3.5 rounded-sm shrink-0 border border-black/10"
                               :style="`background:${variant.color_hex}`" />
-                        <span class="truncate text-sm">{{ variant.color ? colorLabel(variant.color) : 'Выберите цвет' }}</span>
+                        <span class="truncate text-sm">{{ variant.color ? localeStore.t(variant.color) : 'Выберите цвет' }}</span>
                       </div>
                     </SelectTrigger>
                     <SelectContent class="max-h-64">
@@ -344,6 +298,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ProductImagesManager from '@/components/admin/ProductImagesManager.vue'
+import FieldError from '@/components/parts/FieldError.vue'
 import { useAdminProductService } from '@/services/adminProductService'
 import { useAdminLocationService } from '@/services/adminLocationService'
 import { useProductService } from '@/services/productService'
@@ -356,6 +311,27 @@ import { useProductValidation } from '@/composables/useProductValidation'
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
+const STATUS_FLAGS = [
+  { key: 'is_active', label: 'Активен' },
+  { key: 'is_new',    label: 'Новинка' },
+  { key: 'is_hit',    label: 'Хит' },
+  { key: 'is_sale',   label: 'Скидка' },
+]
+
+const SPEC_FLAGS = [
+  { key: 'hood',            label: 'Есть капюшон' },
+  { key: 'detachable_hood', label: 'Съёмный капюшон' },
+  { key: 'waterproof',      label: 'Водонепроницаемый' },
+]
+
+const MATERIAL_FIELDS = [
+  { key: 'outer_material_id',  classifier: 'outer_material',  label: 'Внешний материал', placeholder: 'Выберите материал' },
+  { key: 'lining_material_id', classifier: 'lining_material', label: 'Подкладка',        placeholder: 'Выберите подкладку' },
+  { key: 'filling_id',         classifier: 'filling',         label: 'Наполнитель',      placeholder: 'Выберите наполнитель' },
+]
+
+const BOOLEAN_FIELDS = [...STATUS_FLAGS, ...SPEC_FLAGS].map(f => f.key)
+
 // ─── Props / services ─────────────────────────────────────────────────────────
 const props = defineProps({ id: { type: String, default: null } })
 const router = useRouter()
@@ -366,12 +342,6 @@ const { getCategories } = useCategoryService()
 const { getClassifiers, getBrands } = useClassifierService()
 const localeStore = useLocaleStore()
 const { validate, flattenErrors, fieldMsg } = useProductValidation()
-
-// ─── Inline micro-component ───────────────────────────────────────────────────
-const FieldError = {
-  props: ['msgs'],
-  template: `<p v-if="msgs" class="text-xs text-destructive mt-1">{{ Array.isArray(msgs) ? msgs[0] : msgs }}</p>`,
-}
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const product      = ref(null)
@@ -432,18 +402,12 @@ function fillFromProduct(p) {
     brand_id:           nid(p.brand_id),
     description:        loc(p.description),
     short_description:  loc(p.short_description),
-    is_active:          !!p.is_active,
-    is_new:             !!p.is_new,
-    is_hit:             !!p.is_hit,
-    is_sale:            !!p.is_sale,
+    ...Object.fromEntries(BOOLEAN_FIELDS.map(key => [key, !!p[key]])),
     outer_material_id:  nid(p.outer_material_id),
     lining_material_id: nid(p.lining_material_id),
     filling_id:         nid(p.filling_id),
     season:             p.season  || 'none',
     length:             p.length  || 'none',
-    hood:               !!p.hood,
-    detachable_hood:    !!p.detachable_hood,
-    waterproof:         !!p.waterproof,
     variants: (p.variants ?? []).map(v => ({
       color:       v.color       ?? '',
       color_hex:   v.color_hex   ?? '#000000',
@@ -469,13 +433,7 @@ function buildPayload(f) {
     old_price:          f.old_price || null,
     season:             f.season === 'none' ? null : f.season,
     length:             f.length === 'none' ? null : f.length,
-    is_active:          f.is_active      ? 1 : 0,
-    is_new:             f.is_new         ? 1 : 0,
-    is_hit:             f.is_hit         ? 1 : 0,
-    is_sale:            f.is_sale        ? 1 : 0,
-    hood:               f.hood           ? 1 : 0,
-    detachable_hood:    f.detachable_hood ? 1 : 0,
-    waterproof:         f.waterproof     ? 1 : 0,
+    ...Object.fromEntries(BOOLEAN_FIELDS.map(key => [key, f[key] ? 1 : 0])),
     variants: f.variants.map(v => ({
       color:       v.color     || null,
       color_hex:   v.color_hex || null,
@@ -497,15 +455,6 @@ function slugify(str) {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-}
-
-function colorLabel(colorJson) {
-  try {
-    const obj = typeof colorJson === 'string' ? JSON.parse(colorJson) : colorJson
-    return localeStore.t(obj)
-  } catch {
-    return colorJson
-  }
 }
 
 function showValidationToast(errs) {

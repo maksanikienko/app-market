@@ -32,7 +32,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="FORYOU — Colecții de modă pentru femei">
     <meta name="twitter:description" content="Colecții exclusive de jachete, paltoane și haine pentru femei.">
-    <meta name="twitter:image" content="{{ asset('og-image.jpg') }}">
+    <meta name="twitter:image" content="{{ asset('og-image.png') }}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -40,10 +40,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+    @fonts
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @routes

@@ -53,15 +53,15 @@
         <p class="text-[10px] font-medium uppercase tracking-widest text-stone-400 truncate">
           {{ product.brand?.name ?? localeStore.t(product.category?.name) ?? '' }}
         </p>
-        <div v-if="uniqueColors.length" class="flex items-center flex-wrap gap-0.5 shrink-0 ml-2">
+        <div v-if="colors.length" class="flex items-center flex-wrap gap-0.5 shrink-0 ml-2">
           <span
-            v-for="c in uniqueColors.slice(0, 8)"
-            :key="c"
+            v-for="c in colors.slice(0, MAX_SWATCHES)"
+            :key="c.hex"
             class="w-3 h-3 rounded-full border border-stone-200 shrink-0"
-            :style="{ backgroundColor: c }"
+            :style="{ backgroundColor: c.hex }"
           />
-          <span v-if="uniqueColors.length > 8" class="text-[10px] text-stone-400 leading-none">
-            +{{ uniqueColors.length - 8 }}
+          <span v-if="colors.length > MAX_SWATCHES" class="text-[10px] text-stone-400 leading-none">
+            +{{ colors.length - MAX_SWATCHES }}
           </span>
         </div>
       </div>
@@ -82,9 +82,9 @@
 
       <!-- Price — always at bottom -->
       <div class="flex items-baseline gap-2 mt-auto pt-1">
-        <span class="text-base font-semibold text-stone-900">{{ Number(product.price).toFixed(2) }} lei</span>
+        <span class="text-base font-semibold text-stone-900">{{ formatPrice(product.price) }}</span>
         <span v-if="product.old_price" class="text-xs line-through text-stone-400">
-          {{ Number(product.old_price).toFixed(2) }} lei
+          {{ formatPrice(product.old_price) }}
         </span>
       </div>
 
@@ -102,21 +102,21 @@
 
       <div class="space-y-5 pt-1">
         <!-- Colors -->
-        <div v-if="variantColors.length" class="space-y-2.5">
+        <div v-if="hasColors" class="space-y-2.5">
           <div class="flex items-center gap-2">
             <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-600">
               {{ t('filter.color') }}
             </span>
             <span v-if="selectedColor" class="text-xs text-stone-500">
-              {{ colorLabel(selectedColorName) }}
+              {{ localeStore.t(selectedColorName) }}
             </span>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="c in variantColors"
+              v-for="c in colors"
               :key="c.hex"
               type="button"
-              @click="selectColor(c)"
+              @click="selectColor(c.hex)"
               class="w-7 h-7 rounded-full transition-all duration-150"
               :class="selectedColor === c.hex
                 ? 'ring-2 ring-stone-900 ring-offset-2'
@@ -136,7 +136,7 @@
               v-for="size in availableSizes"
               :key="size"
               type="button"
-              @click="selectedSize = size"
+              @click="selectSize(size)"
               class="min-w-[2.5rem] px-3 py-1.5 text-xs font-medium border rounded-md transition-colors duration-150"
               :class="selectedSize === size
                 ? 'bg-stone-900 text-white border-stone-900'
@@ -147,9 +147,9 @@
 
         <button
           @click="addToCartWithVariant"
-          :disabled="!pickedVariant || adding"
+          :disabled="!variant || adding"
           class="w-full py-3 text-xs font-semibold uppercase tracking-widest rounded-lg transition-colors duration-200"
-          :class="pickedVariant && !adding
+          :class="variant && !adding
             ? 'bg-stone-900 text-white hover:bg-stone-700'
             : 'bg-stone-100 text-stone-400 cursor-not-allowed'"
         >
@@ -166,13 +166,17 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Package, Check, Loader2 } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 import { useCartStore } from '@/store/cartStore.js';
 import { useLocaleStore } from '@/store/localeStore.js';
 import { useI18n } from '@/i18n';
+import { useVariantPicker } from '@/composables/useVariantPicker.js';
+import { formatPrice } from '@/lib/format.js';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import { toast } from 'vue-sonner';
+
+const MAX_SWATCHES = 8;
 
 const props = defineProps({ product: { type: Object, required: true } });
 
@@ -180,122 +184,45 @@ const { t }       = useI18n();
 const cartStore   = useCartStore();
 const localeStore = useLocaleStore();
 
-const inCart = computed(() => cartStore.itemIds.has(props.product.id));
+const {
+  selectedColor, selectedSize, selectedColorName,
+  colors, hasColors, availableSizes, variant, cartPayload,
+  selectColor, selectSize, reset,
+} = useVariantPicker(() => props.product.variants);
 
-// Unique hex list for the card swatches display
-const uniqueColors = computed(() => {
-  const seen = new Set()
-  for (const v of (props.product.variants ?? [])) {
-    if (v.color_hex) seen.add(v.color_hex)
-  }
-  return [...seen]
-});
+const inCart       = computed(() => cartStore.itemIds.has(props.product.id));
+const hasVariants  = computed(() => (props.product.variants?.length ?? 0) > 0);
+const selectorOpen = ref(false);
+const adding       = ref(false);
 
-// ── Variant selector ──────────────────────────────────────────────────────
-const selectorOpen  = ref(false)
-const selectedColor = ref(null)   // hex string | null
-const selectedSize  = ref(null)   // string | null
-const adding        = ref(false)
-
-const hasVariants = computed(() => (props.product.variants?.length ?? 0) > 0)
-
-// Unique colors with name for the selector swatches
-const variantColors = computed(() => {
-  const seen = new Map()
-  for (const v of (props.product.variants ?? [])) {
-    if (v.color_hex && !seen.has(v.color_hex)) {
-      seen.set(v.color_hex, { hex: v.color_hex, name: v.color ?? '' })
-    }
-  }
-  return [...seen.values()]
-})
-
-// All sizes across all variants (to determine if size selection is required)
-const allSizes = computed(() =>
-  [...new Set((props.product.variants ?? []).filter(v => v.size).map(v => v.size))]
-)
-
-// Sizes for currently selected color (or all if no color selected)
-const availableSizes = computed(() => {
-  const pool = selectedColor.value
-    ? (props.product.variants ?? []).filter(v => v.color_hex === selectedColor.value)
-    : (props.product.variants ?? [])
-  return [...new Set(pool.filter(v => v.size).map(v => v.size))]
-})
-
-// The name string of the currently selected color (for display)
-const selectedColorName = computed(() =>
-  variantColors.value.find(c => c.hex === selectedColor.value)?.name ?? ''
-)
-
-// Matched variant — null when required fields not yet chosen
-const pickedVariant = computed(() =>
-  (props.product.variants ?? []).find(v => {
-    const colorOK = variantColors.value.length === 0 || v.color_hex === selectedColor.value
-    const sizeOK  = allSizes.value.length === 0      || v.size === selectedSize.value
-    return colorOK && sizeOK
-  }) ?? null
-)
-
-function colorLabel(nameJson) {
-  if (!nameJson) return ''
+async function addToCart(payload = {}, description) {
+  adding.value = true;
   try {
-    const obj = typeof nameJson === 'string' ? JSON.parse(nameJson) : nameJson
-    return localeStore.t(obj)
-  } catch {
-    return nameJson
+    await cartStore.add(props.product.id, payload);
+    selectorOpen.value = false;
+    toast.success(localeStore.t(props.product.name), { description });
+  } catch (e) {
+    console.error(e);
+  } finally {
+    adding.value = false;
   }
 }
 
-function selectColor(c) {
-  selectedColor.value = c.hex
-  // reset size if it's not available for the new color
-  if (selectedSize.value && !availableSizes.value.includes(selectedSize.value)) {
-    selectedSize.value = null
-  }
-}
-
-const handleAdd = async () => {
-  if (inCart.value || adding.value) return
+const handleAdd = () => {
+  if (inCart.value || adding.value) return;
 
   if (hasVariants.value) {
-    selectedColor.value = null
-    selectedSize.value  = null
-    selectorOpen.value  = true
-    return
+    reset();
+    selectorOpen.value = true;
+    return;
   }
 
-  adding.value = true
-  try {
-    await cartStore.add(props.product.id)
-    toast.success(localeStore.t(props.product.name))
-  } catch (e) {
-    console.error(e)
-  } finally {
-    adding.value = false
-  }
-}
+  addToCart();
+};
 
-const addToCartWithVariant = async () => {
-  if (!pickedVariant.value || adding.value) return
-  adding.value = true
-  try {
-    await cartStore.add(props.product.id, {
-      variant_id: pickedVariant.value.id,
-      color:      pickedVariant.value.color     ?? null,
-      color_hex:  pickedVariant.value.color_hex ?? null,
-      size:       pickedVariant.value.size      ?? null,
-    })
-    selectorOpen.value = false
-    const parts = [
-      selectedSize.value,
-      colorLabel(pickedVariant.value.color),
-    ].filter(Boolean).join(' · ')
-    toast.success(localeStore.t(props.product.name), { description: parts || undefined })
-  } catch (e) {
-    console.error(e)
-  } finally {
-    adding.value = false
-  }
-}
+const addToCartWithVariant = () => {
+  if (!variant.value || adding.value) return;
+  const description = [selectedSize.value, localeStore.t(variant.value.color)].filter(Boolean).join(' · ');
+  addToCart(cartPayload.value, description || undefined);
+};
 </script>

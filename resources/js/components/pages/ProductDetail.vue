@@ -41,12 +41,19 @@
                   :key="img.id"
                   class="pl-0"
                 >
-                  <div class="aspect-[4/5] sm:aspect-square">
+                  <div class="relative aspect-[4/5] sm:aspect-square overflow-hidden">
+                    <!-- Blurred backdrop fills the letterbox with the photo's own colors -->
+                    <img
+                      :src="img.thumb_url"
+                      alt=""
+                      aria-hidden="true"
+                      class="absolute inset-0 w-full h-full object-cover scale-125 blur-2xl saturate-150 opacity-70 pointer-events-none"
+                    />
                     <img
                       :src="img.original_url"
                       :alt="localeStore.t(product.name)"
                       loading="lazy"
-                      class="w-full h-full object-cover cursor-zoom-in"
+                      class="relative w-full h-full object-contain cursor-zoom-in"
                       @click="openLightbox(i)"
                       @load="onImageLoad($event, img.id)"
                     />
@@ -108,9 +115,9 @@
 
         <!-- Price -->
         <div class="border-y py-4 flex items-baseline gap-3">
-          <span class="text-3xl font-bold">{{ Number(displayPrice).toFixed(2) }} lei</span>
+          <span class="text-3xl font-bold">{{ formatPrice(displayPrice) }}</span>
           <span v-if="product.old_price" class="text-xl line-through text-muted-foreground">
-            {{ Number(product.old_price).toFixed(2) }} lei
+            {{ formatPrice(product.old_price) }}
           </span>
           <span v-if="product.old_price" class="text-sm font-medium text-red-500">
             -{{ Math.round((1 - product.price / product.old_price) * 100) }}%
@@ -123,18 +130,18 @@
             <p class="text-sm font-medium" :class="showValidation && !selectedColor ? 'text-destructive' : ''">
               {{ t('product.color') }}:
               <span class="font-normal" :class="selectedColor ? 'text-foreground' : 'text-muted-foreground'">
-                {{ selectedColor ? colorLabel(selectedColor) : '—' }}
+                {{ selectedColor ? localeStore.t(selectedColorName) : '—' }}
               </span>
             </p>
             <div class="flex flex-wrap gap-2">
               <button
-                v-for="c in uniqueColors" :key="c.name"
+                v-for="c in colors" :key="c.hex"
                 type="button"
-                :title="colorLabel(c.name)"
-                @click="selectColor(c.name)"
+                :title="localeStore.t(c.name)"
+                @click="toggleColor(c.hex)"
                 :class="[
                   'w-8 h-8 rounded-full border-2 transition-all',
-                  selectedColor === c.name
+                  selectedColor === c.hex
                     ? 'border-foreground scale-110 shadow-md'
                     : 'border-transparent hover:scale-105 hover:border-muted-foreground'
                 ]"
@@ -151,7 +158,7 @@
               <button
                 v-for="size in availableSizes" :key="size"
                 type="button"
-                @click="selectedSize = selectedSize === size ? null : size; showValidation = false"
+                @click="toggleSize(size)"
                 :class="[
                   'min-w-[2.5rem] px-3 py-1.5 text-sm border rounded-md transition-colors',
                   selectedSize === size
@@ -162,18 +169,18 @@
             </div>
           </div>
 
-          <p v-if="showValidation && (hasColors && !selectedColor || hasSizes && !selectedSize)"
+          <p v-if="showValidation && !isComplete"
              class="text-sm text-destructive">
             {{ t('product.choose_params') }}
           </p>
 
           <p
-            v-if="selectedVariant"
+            v-if="variant"
             class="text-sm font-medium"
-            :class="selectedVariant.stock > 0 ? 'text-emerald-600' : 'text-destructive'"
+            :class="variant.stock > 0 ? 'text-emerald-600' : 'text-destructive'"
           >
-            {{ selectedVariant.stock > 0
-              ? t('product.in_stock') + ': ' + selectedVariant.stock + ' ' + t('product.pcs')
+            {{ variant.stock > 0
+              ? t('product.in_stock') + ': ' + variant.stock + ' ' + t('product.pcs')
               : t('product.not_in_stock') }}
           </p>
         </div>
@@ -187,7 +194,7 @@
                 <Minus class="h-4 w-4" />
               </Button>
               <span class="w-12 text-center text-sm font-medium">{{ quantity }}</span>
-              <Button variant="ghost" size="sm" class="px-3" @click="quantity++">
+              <Button variant="ghost" size="sm" class="px-3" :disabled="quantity >= maxQuantity" @click="quantity++">
                 <Plus class="h-4 w-4" />
               </Button>
             </div>
@@ -195,7 +202,7 @@
 
           <div class="flex gap-3">
             <Button size="lg" class="flex-1" @click="addToCart"
-              :disabled="adding || isInCart || selectedVariant?.stock === 0"
+              :disabled="adding || isInCart || variant?.stock === 0"
               :variant="isInCart ? 'secondary' : 'default'">
               <Check v-if="isInCart" class="h-5 w-5 mr-2" />
               <ShoppingCart v-else class="h-5 w-5 mr-2" />
@@ -215,11 +222,11 @@
           </div>
           <div v-if="product.season" class="flex justify-between">
             <span class="text-muted-foreground">{{ t('product.spec.season') }}</span>
-            <span class="font-medium">{{ seasonLabel }}</span>
+            <span class="font-medium">{{ classifierLabel('season', product.season) }}</span>
           </div>
           <div v-if="product.length" class="flex justify-between">
             <span class="text-muted-foreground">{{ t('product.spec.length') }}</span>
-            <span class="font-medium">{{ lengthLabel }}</span>
+            <span class="font-medium">{{ classifierLabel('length', product.length) }}</span>
           </div>
           <div v-if="product.outer_material" class="flex justify-between">
             <span class="text-muted-foreground">{{ t('product.spec.outer') }}</span>
@@ -294,7 +301,7 @@
 <script setup>
 import 'swiper/css'
 import 'photoswipe/style.css'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay } from 'swiper/modules'
@@ -310,6 +317,9 @@ import { useCartStore } from '@/store/cartStore.js'
 import { useClassifierService } from '@/services/classifierService.js'
 import { useLocaleStore } from '@/store/localeStore.js'
 import { useI18n } from '@/i18n'
+import { useVariantPicker } from '@/composables/useVariantPicker.js'
+import { formatPrice } from '@/lib/format.js'
+import { MAX_CART_QUANTITY } from '@/config/cart.js'
 import { toast } from 'vue-sonner'
 
 const route        = useRoute()
@@ -324,8 +334,6 @@ const loading       = ref(true)
 const adding        = ref(false)
 const quantity      = ref(1)
 const classifiers   = ref({})
-const selectedColor = ref(null)
-const selectedSize  = ref(null)
 const showValidation = ref(false)
 const featured      = ref([])
 
@@ -372,67 +380,31 @@ onUnmounted(() => pswp?.destroy())
 // ── Product data ────────────────────────────────────────
 const isInCart = computed(() => product.value && cartStore.itemIds.has(product.value.id))
 
-const uniqueColors = computed(() => {
-  const seen = new Set()
-  return (product.value?.variants ?? []).reduce((acc, v) => {
-    if (v.color && !seen.has(v.color)) {
-      seen.add(v.color)
-      acc.push({ name: v.color, hex: v.color_hex ?? '#aaaaaa' })
-    }
-    return acc
-  }, [])
-})
+const {
+  selectedColor, selectedSize, selectedColorName,
+  colors, hasColors, hasSizes, availableSizes,
+  isComplete, variant, cartPayload,
+  selectColor, selectSize,
+} = useVariantPicker(() => product.value?.variants)
 
-const hasColors = computed(() => uniqueColors.value.length > 0)
-const hasSizes  = computed(() => (product.value?.variants ?? []).some(v => v.size))
+const maxQuantity  = computed(() => Math.min(MAX_CART_QUANTITY, variant.value?.stock || MAX_CART_QUANTITY))
+watch(maxQuantity, max => { quantity.value = Math.min(quantity.value, max) })
 
-const availableSizes = computed(() => {
-  const variants = product.value?.variants ?? []
-  const pool = selectedColor.value ? variants.filter(v => v.color === selectedColor.value) : variants
-  const seen = new Set()
-  return pool.filter(v => v.size && !seen.has(v.size) && seen.add(v.size)).map(v => v.size)
-})
+const displayPrice = computed(() => variant.value?.price ?? product.value?.price)
 
-const selectedVariant = computed(() => {
-  if (!selectedColor.value && !selectedSize.value) return null
-  return (product.value?.variants ?? []).find(v =>
-    (!selectedColor.value || v.color === selectedColor.value) &&
-    (!selectedSize.value  || v.size  === selectedSize.value)
-  ) ?? null
-})
-
-const displayPrice = computed(() =>
-  selectedVariant.value?.price != null ? selectedVariant.value.price : product.value?.price
-)
-
-const seasonLabel = computed(() => {
-  const key = product.value?.season
-  if (!key) return ''
-  const item = (classifiers.value?.season ?? []).find(c => c.key === key)
+const classifierLabel = (type, key) => {
+  const item = (classifiers.value?.[type] ?? []).find(c => c.key === key)
   return item ? localeStore.t(item.name) : key
-})
-
-const lengthLabel = computed(() => {
-  const key = product.value?.length
-  if (!key) return ''
-  const item = (classifiers.value?.length ?? []).find(c => c.key === key)
-  return item ? localeStore.t(item.name) : key
-})
-
-function colorLabel(nameJson) {
-  if (!nameJson) return ''
-  try {
-    const obj = typeof nameJson === 'string' ? JSON.parse(nameJson) : nameJson
-    return localeStore.t(obj)
-  } catch { return nameJson }
 }
 
-function selectColor(name) {
-  selectedColor.value = selectedColor.value === name ? null : name
+function toggleColor(hex) {
+  selectColor(selectedColor.value === hex ? null : hex)
   showValidation.value = false
-  if (selectedSize.value && !availableSizes.value.includes(selectedSize.value)) {
-    selectedSize.value = null
-  }
+}
+
+function toggleSize(size) {
+  selectSize(selectedSize.value === size ? null : size)
+  showValidation.value = false
 }
 
 onMounted(async () => {
@@ -462,21 +434,16 @@ onMounted(async () => {
 const addToCart = async () => {
   if (!product.value || adding.value || isInCart.value) return
 
-  if ((hasColors.value && !selectedColor.value) || (hasSizes.value && !selectedSize.value)) {
+  if (!isComplete.value) {
     showValidation.value = true
     return
   }
 
   adding.value = true
   try {
-    await cartStore.add(product.value.id, {
-      variant_id: selectedVariant.value?.id       ?? null,
-      color:      selectedVariant.value?.color     ?? null,
-      color_hex:  selectedVariant.value?.color_hex ?? null,
-      size:       selectedVariant.value?.size      ?? null,
-    })
+    await cartStore.add(product.value.id, { ...cartPayload.value, quantity: quantity.value })
     toast.success(localeStore.t(product.value.name), {
-      description: [selectedSize.value, colorLabel(selectedVariant.value?.color)].filter(Boolean).join(' · ') || undefined,
+      description: [selectedSize.value, localeStore.t(variant.value?.color)].filter(Boolean).join(' · ') || undefined,
     })
   } catch (e) {
     console.error('Failed to add to cart:', e)

@@ -65,7 +65,7 @@
               </template>
             </div>
             <span class="text-sm font-semibold text-stone-900">
-              {{ t('profile.order.total') }}: {{ formatTotal(order) }} MDL
+              {{ t('profile.order.total') }}: {{ formatPrice(orderTotal(order), 'MDL') }}
             </span>
           </div>
         </CardHeader>
@@ -111,7 +111,7 @@
                       :style="{ backgroundColor: product.pivot.color_hex }"
                     />
                     <span v-if="product.pivot?.color" class="text-[11px] text-stone-400">
-                      {{ parseColor(product.pivot.color) }}
+                      {{ localeStore.t(product.pivot.color) }}
                     </span>
                     <Badge v-if="product.pivot?.size" variant="outline" class="text-[10px] px-1.5 py-0 h-5">
                       {{ product.pivot.size }}
@@ -126,7 +126,7 @@
 
                 <!-- Line total -->
                 <TableCell class="text-right pr-5 py-3">
-                  <span class="text-sm font-semibold text-stone-900">{{ lineTotal(product) }} MDL</span>
+                  <span class="text-sm font-semibold text-stone-900">{{ formatPrice(lineTotal(product), 'MDL') }}</span>
                 </TableCell>
 
               </TableRow>
@@ -145,7 +145,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/store/userStore.js'
 import { useLocaleStore } from '@/store/localeStore.js'
 import { useProfileService } from '@/services/profileService.js'
-import { useI18n } from '@/i18n.js'
+import { useI18n } from '@/i18n'
+import { formatPrice, lineTotal, orderTotal } from '@/lib/format.js'
 import { Package, ShoppingBag } from 'lucide-vue-next'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -163,7 +164,6 @@ const orders = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  if (!user.value) await userStore.fetchUser()
   try {
     orders.value = await getOrders()
   } finally {
@@ -171,25 +171,6 @@ onMounted(async () => {
   }
 })
 
-const lineTotal = (product) =>
-  (parseFloat(product.price) * (product.pivot?.count ?? 1)).toFixed(2)
-
-const formatTotal = (order) =>
-  (order.products ?? [])
-    .reduce((sum, p) => sum + parseFloat(p.price) * (p.pivot?.count ?? 1), 0)
-    .toFixed(2)
-
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' })
-
-const parseColor = (color) => {
-  if (!color) return ''
-  if (typeof color === 'object') return localeStore.t(color)
-  try {
-    const parsed = JSON.parse(color)
-    return localeStore.t(parsed)
-  } catch {
-    return color
-  }
-}
 </script>

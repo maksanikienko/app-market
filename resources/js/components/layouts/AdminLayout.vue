@@ -9,23 +9,17 @@
         <span class="font-medium text-foreground">Панель Администратора</span>
       </div>
 
-      <div class="mb-6 flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" @click="$router.push('/admin/products')">
-          Продукты
+      <nav class="mb-6 flex flex-wrap gap-2">
+        <Button
+          v-for="link in NAV_LINKS"
+          :key="link.to"
+          as-child
+          size="sm"
+          :variant="$route.path.startsWith(link.to) ? 'default' : 'outline'"
+        >
+          <RouterLink :to="link.to">{{ link.label }}</RouterLink>
         </Button>
-        <Button size="sm" variant="outline" @click="$router.push('/admin/categories')">
-          Категории
-        </Button>
-        <Button size="sm" variant="outline" @click="$router.push('/admin/orders')">
-          Заказы
-        </Button>
-        <Button size="sm" variant="outline" @click="$router.push('/admin/stock')">
-          Склад
-        </Button>
-        <Button size="sm" variant="outline" @click="$router.push('/admin/errors')">
-          Ошибки
-        </Button>
-      </div>
+      </nav>
 
       <router-view />
     </main>
@@ -35,5 +29,12 @@
 <script setup>
 import Header from '@/components/layouts/Header.vue'
 import { Button } from '@/components/ui/button'
-</script>
 
+const NAV_LINKS = [
+  { to: '/admin/products',   label: 'Продукты' },
+  { to: '/admin/categories', label: 'Категории' },
+  { to: '/admin/orders',     label: 'Заказы' },
+  { to: '/admin/stock',      label: 'Склад' },
+  { to: '/admin/errors',     label: 'Ошибки' },
+]
+</script>

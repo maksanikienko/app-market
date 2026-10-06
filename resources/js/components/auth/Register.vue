@@ -4,7 +4,7 @@
       <CardHeader class="space-y-2">
         <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
           <ArrowLeft class="h-3.5 w-3.5" />
-          Home
+          {{ t('auth.home') }}
         </RouterLink>
         <CardTitle class="text-2xl">{{ t('auth.register.title') }}</CardTitle>
         <CardDescription>{{ t('auth.register.subtitle') }}</CardDescription>
@@ -13,14 +13,8 @@
       <CardContent>
         <form @submit.prevent="submit" class="space-y-4">
           <div class="space-y-2">
-            <div class="space-y-2">
-              <Label for="name">{{ t('auth.fields.name') }}</Label>
-              <Input id="name" :placeholder="t('auth.fields.name')" v-model="form.firstName" required />
-            </div>
-<!--            <div class="space-y-2">-->
-<!--              <Label for="lastName">{{ t('auth.fields.surname') }}</Label>-->
-<!--              <Input id="lastName" placeholder="Doe" v-model="form.lastName" required />-->
-<!--            </div>-->
+            <Label for="name">{{ t('auth.fields.name') }}</Label>
+            <Input id="name" :placeholder="t('auth.fields.name')" v-model="form.name" required />
           </div>
 
           <div class="space-y-2">
@@ -43,18 +37,6 @@
             <UserPlus class="h-4 w-4 mr-2" />
             {{ isLoading ? t('auth.register.submitting') : t('auth.register.submit') }}
           </Button>
-
-<!--          <div class="relative">-->
-<!--            <Separator />-->
-<!--            <span class="absolute inset-0 flex items-center justify-center">-->
-<!--              <span class="bg-card px-2 text-xs text-muted-foreground">{{ t('auth.or') }}</span>-->
-<!--            </span>-->
-<!--          </div>-->
-
-<!--          <Button variant="outline" type="button" class="w-full" disabled>-->
-<!--            <Chrome class="h-4 w-4 mr-2" />-->
-<!--            {{ t('auth.google') }}-->
-<!--          </Button>-->
         </form>
       </CardContent>
 
@@ -82,18 +64,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'vue-sonner';
-import { UserPlus, Github, Chrome, ArrowLeft } from 'lucide-vue-next';
+import { UserPlus, ArrowLeft } from 'lucide-vue-next';
 
 const router = useRouter()
 const userStore = useUserStore()
 const { t } = useI18n()
 
 const form = reactive({
-  firstName: '',
-  // lastName: '',
+  name: '',
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 const isLoading = ref(false)
@@ -103,7 +84,7 @@ const submit = async () => {
     isLoading.value = true
 
     const success = await userStore.register({
-      name: form.firstName.trim(),
+      name: form.name.trim(),
       email: form.email,
       password: form.password,
       password_confirmation: form.confirmPassword

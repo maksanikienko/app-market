@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BasketAddRequest;
+use App\Http\Requests\BasketUpdateRequest;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +27,7 @@ class BasketController extends Controller
     }
 
     #[Route(method: 'POST', uri: 'add/{id}', name: 'api.basket-add')]
-    public function add(Request $request, $productId): JsonResponse
+    public function add(BasketAddRequest $request, $productId): JsonResponse
     {
         try {
             $orderId = session('orderId');
@@ -37,19 +39,17 @@ class BasketController extends Controller
                 $order = Order::findOrFail($orderId);
             }
 
-            $variantData = array_filter(
-                $request->only(['variant_id', 'color', 'color_hex', 'size']),
-                fn($v) => $v !== null && $v !== ''
-            );
+            $variantData = $request->variantData();
+            $quantity    = $request->quantity();
 
             if ($order->products->contains($productId)) {
                 $pivotRow = $order->products()->where('product_id', $productId)->first()->pivot;
                 $order->products()->updateExistingPivot($productId, array_merge(
-                    ['count' => $pivotRow->count + 1],
+                    ['count' => $pivotRow->count + $quantity],
                     $variantData
                 ));
             } else {
-                $order->products()->attach($productId, array_merge(['count' => 1], $variantData));
+                $order->products()->attach($productId, array_merge(['count' => $quantity], $variantData));
             }
 
             if (Auth::check()) {
@@ -114,15 +114,7 @@ class BasketController extends Controller
                 'phone' => ['nullable', 'string', 'max:50'],
             ]);
 
-            $orderId = session('orderId');
-
-            if ($orderId) {
-                $order = Order::with('products')->find($orderId);
-            } elseif (Auth::check()) {
-                $order = Auth::user()->basket()->with('products')->first();
-            } else {
-                $order = null;
-            }
+            $order = $this->currentBasket();
 
             if (!$order || $order->products->isEmpty()) {
                 return response()->json(['success' => false, 'message' => 'Cart is empty'], 422);
@@ -148,19 +140,33 @@ class BasketController extends Controller
     }
 
     #[Route(method: 'POST', uri: 'update', name: 'api.basket-update')]
-    public function update(Request $request): JsonResponse
+    public function update(BasketUpdateRequest $request): JsonResponse
     {
         try {
-            if (!Auth::check()) {
-                return response()->json(['success' => false], 401);
+            $order     = $this->currentBasket();
+            $productId = $request->integer('product_id');
+
+            if (!$order || !$order->products->contains($productId)) {
+                return response()->json(['success' => false, 'message' => 'Product not in basket'], 404);
             }
 
-            $order = Auth::user()->basket()->firstOrCreate(['status' => 0]);
-            $order->products()->updateExistingPivot($request->product_id, ['count' => $request->quantity]);
+            $order->products()->updateExistingPivot($productId, ['count' => $request->integer('quantity')]);
 
             return response()->json(['success' => true]);
         } catch (\Throwable $e) {
             return $this->handleError($e);
         }
+    }
+
+    // Guest basket lives in the session; a logged-in user without one falls back to their saved basket.
+    private function currentBasket(): ?Order
+    {
+        $orderId = session('orderId');
+
+        if ($orderId) {
+            return Order::with('products')->find($orderId);
+        }
+
+        return Auth::check() ? Auth::user()->basket()->with('products')->first() : null;
     }
 }

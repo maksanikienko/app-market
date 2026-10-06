@@ -37,21 +37,17 @@
         <div class="space-y-2 text-sm border-b pb-4">
           <div class="flex justify-between">
             <span class="text-muted-foreground">{{ t('cart.subtotal') }}</span>
-            <span>{{ subtotal.toFixed(2) }} lei</span>
+            <span>{{ formatPrice(subtotal) }}</span>
           </div>
-<!--          <div class="flex justify-between">-->
-<!--            <span class="text-muted-foreground">{{ t('cart.shipping') }}</span>-->
-<!--            <span>{{ shipping === 0 ? t('common.free') : `${shipping.toFixed(2)} lei` }}</span>-->
-<!--          </div>-->
           <div class="flex justify-between">
             <span class="text-muted-foreground">{{ t('cart.tax') }}</span>
-            <span>{{ tax.toFixed(2) }} lei</span>
+            <span>{{ formatPrice(tax) }}</span>
           </div>
         </div>
 
         <div class="flex justify-between text-lg font-bold">
           <span>{{ t('cart.total') }}</span>
-          <span>{{ total.toFixed(2) }} lei</span>
+          <span>{{ formatPrice(total) }}</span>
         </div>
 
         <Button class="w-full" @click="dialogOpen = true">
@@ -60,16 +56,6 @@
         <Button variant="outline" class="w-full" as-child>
           <RouterLink to="/products">{{ t('cart.continue') }}</RouterLink>
         </Button>
-
-<!--        <Separator />-->
-
-<!--        <div class="space-y-2">-->
-<!--          <Label for="promo">{{ t('cart.promo') }}</Label>-->
-<!--          <div class="flex gap-2">-->
-<!--            <Input id="promo" :placeholder="t('cart.promoCode')" v-model="promoCode" />-->
-<!--            <Button variant="outline" @click="applyPromo">{{ t('cart.apply') }}</Button>-->
-<!--          </div>-->
-<!--        </div>-->
       </div>
     </div>
 
@@ -112,7 +98,7 @@
               <span>{{ t('cart.dialog.items') }}</span><span>{{ cartStore.count }}</span>
             </div>
             <div class="flex justify-between font-semibold">
-              <span>{{ t('cart.dialog.total') }}</span><span>{{ total.toFixed(2) }} lei</span>
+              <span>{{ t('cart.dialog.total') }}</span><span>{{ formatPrice(total) }}</span>
             </div>
           </div>
         </div>
@@ -139,21 +125,19 @@ import CartService from '@/services/cartService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import CartItem from '@/components/parts/CartItem.vue';
 import { ShoppingCart, CheckCircle, Loader2 } from 'lucide-vue-next';
-import { useLocaleStore } from '@/store/localeStore';
 import { useI18n } from '@/i18n';
+import { formatPrice } from '@/lib/format.js';
+import { toast } from 'vue-sonner';
 
 const cartStore   = useCartStore();
 const userStore   = useUserStore();
-const localeStore = useLocaleStore();
 const { t }       = useI18n();
-const promoCode   = ref('');
 
 const dialogOpen    = ref(false);
 const placing       = ref(false);
@@ -165,9 +149,8 @@ const placedOrderId = ref(null);
 const subtotal = computed(() =>
     cartStore.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );
-const shipping = computed(() => subtotal.value > 50 ? 0 : 10);
 const tax      = computed(() => subtotal.value * 0.1);
-const total    = computed(() => subtotal.value + shipping.value + tax.value);
+const total    = computed(() => subtotal.value + tax.value);
 
 watch(dialogOpen, (open) => {
   if (open && !orderForm.value.name && userStore.user?.name) {
@@ -175,21 +158,20 @@ watch(dialogOpen, (open) => {
   }
 });
 
-const orderSuccessMsg = computed(() =>
-  localeStore.current === 'ru'
-    ? `Заказ #${placedOrderId.value} успешно оформлен. Мы свяжемся с вами в ближайшее время.`
-    : `Comanda #${placedOrderId.value} a fost plasată cu succes. Vă vom contacta în curând.`
-);
+const orderSuccessMsg = computed(() => t('cart.placed.message', { id: placedOrderId.value }));
 
-const removeFromCart = async (productId) => {
-  try { await cartStore.remove(productId); }
-  catch (e) { console.error('Failed to remove product', e); }
+// Cart state is replaced only on success, so on failure the UI keeps the last valid values
+const withErrorToast = (action, messageKey) => async (...args) => {
+  try {
+    await action(...args);
+  } catch (e) {
+    console.error(e);
+    toast.error(t(messageKey));
+  }
 };
 
-const updateQuantity = async (productId, quantity) => {
-  try { await cartStore.updateQuantity(productId, quantity); }
-  catch (e) { console.error('Failed to update quantity', e); }
-};
+const removeFromCart = withErrorToast(cartStore.remove, 'cart.error.remove');
+const updateQuantity = withErrorToast(cartStore.updateQuantity, 'cart.error.update');
 
 const confirmOrder = async () => {
   placing.value    = true;
@@ -215,8 +197,6 @@ const confirmOrder = async () => {
     placing.value = false;
   }
 };
-
-const applyPromo = () => {};
 
 onMounted(() => cartStore.fetchCart());
 </script>

@@ -67,7 +67,7 @@
         <div class="flex justify-end mt-3">
           <button
             class="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-            @click="resetFilters"
+            @click="reset"
           >
             Сбросить фильтры
           </button>
@@ -164,11 +164,11 @@
     <div v-if="meta.last_page > 1" class="flex items-center justify-between text-sm text-muted-foreground">
       <span>Всего: {{ meta.total }}</span>
       <div class="flex items-center gap-2">
-        <Button size="sm" variant="outline" :disabled="meta.current_page <= 1" @click="goPage(meta.current_page - 1)">
+        <Button size="sm" variant="outline" :disabled="meta.current_page <= 1" @click="load(meta.current_page - 1)">
           ←
         </Button>
         <span>{{ meta.current_page }} / {{ meta.last_page }}</span>
-        <Button size="sm" variant="outline" :disabled="meta.current_page >= meta.last_page" @click="goPage(meta.current_page + 1)">
+        <Button size="sm" variant="outline" :disabled="meta.current_page >= meta.last_page" @click="load(meta.current_page + 1)">
           →
         </Button>
       </div>
@@ -216,6 +216,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useDebounceFn } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -235,7 +236,7 @@ const categoryStore = useCategoryStore()
 const { categories } = storeToRefs(categoryStore)
 
 const { getAll, remove, restore, forceDelete } = useAdminProductService()
-const { filters, reset, toParams } = useAdminProductFilters()
+const { filters, reset, cycleFlag, toParams } = useAdminProductFilters()
 
 const products       = ref([])
 const loading        = ref(false)
@@ -251,12 +252,6 @@ const badges = [
   { key: 'is_hit',  label: 'Хит'     },
   { key: 'is_sale', label: 'Скидка'  },
 ]
-
-const cycleFlag = (key) => {
-  if (filters[key] === null)  filters[key] = true
-  else if (filters[key])      filters[key] = false
-  else                        filters[key] = null
-}
 
 const load = async (page = 1) => {
   loading.value = true
@@ -274,10 +269,6 @@ const toggleTrash = () => {
   trashed.value = !trashed.value
   load(1)
 }
-
-const goPage = (page) => load(page)
-
-const resetFilters = () => reset()
 
 const confirmDelete = async () => {
   const product = deleteTarget.value
@@ -316,14 +307,10 @@ const confirmForceDelete = async () => {
   }
 }
 
-let debounceTimer = null
-watch(filters, () => {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => load(1), 300)
-})
+watch(filters, useDebounceFn(() => load(1), 300))
 
-onMounted(async () => {
-  if (!categories.value.length) await categoryStore.load()
+onMounted(() => {
+  categoryStore.load()
   load()
 })
 </script>

@@ -190,6 +190,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 import { Trash2, Search, X, Calendar as CalendarIcon } from 'lucide-vue-next';
 import { CalendarDate } from '@internationalized/date';
 import { adminErrorService } from '@/services/adminErrorService.js';
@@ -212,11 +213,7 @@ const selectedLog = ref(null);
 
 const filters = ref({ search: '', date_from: null, date_to: null });
 
-let debounceTimer = null;
-function debouncedLoad() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => load(1), 400);
-}
+const debouncedLoad = useDebounceFn(() => load(1), 400);
 
 function clearFilters() {
   filters.value = { search: '', date_from: null, date_to: null };

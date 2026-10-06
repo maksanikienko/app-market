@@ -6,7 +6,7 @@
       <div class="flex justify-between items-start">
         <div>
           <h3 class="font-semibold">{{ localeStore.t(item.name) }}</h3>
-          <p class="text-sm text-muted-foreground">{{ item.price.toFixed(2) }} lei</p>
+          <p class="text-sm text-muted-foreground">{{ formatPrice(item.price) }}</p>
           <div v-if="item.size || item.color_hex" class="flex items-center gap-1.5 mt-1">
             <span
               v-if="item.color_hex"
@@ -25,13 +25,13 @@
       </div>
 
       <div class="flex items-center justify-between pt-2">
-        <span class="text-lg font-bold">{{ (item.price * item.quantity).toFixed(2) }} lei</span>
+        <span class="text-lg font-bold">{{ formatPrice(item.price * item.quantity) }}</span>
         <div class="flex items-center border rounded">
-          <Button variant="ghost" size="sm" class="px-2" @click="$emit('update-quantity', item.id, Math.max(1, item.quantity - 1))">
+          <Button variant="ghost" size="sm" class="px-2" :disabled="item.quantity <= 1" @click="$emit('update-quantity', item.id, item.quantity - 1)">
             <Minus class="h-4 w-4" />
           </Button>
           <span class="w-8 text-center text-sm">{{ item.quantity }}</span>
-          <Button variant="ghost" size="sm" class="px-2" @click="$emit('update-quantity', item.id, item.quantity + 1)">
+          <Button variant="ghost" size="sm" class="px-2" :disabled="item.quantity >= MAX_CART_QUANTITY" @click="$emit('update-quantity', item.id, item.quantity + 1)">
             <Plus class="h-4 w-4" />
           </Button>
         </div>
@@ -43,14 +43,12 @@
 <script setup>
 import { Button } from '@/components/ui/button';
 import { Trash2, Minus, Plus } from 'lucide-vue-next';
-import {useLocaleStore} from "@/store/localeStore.js";
+import { useLocaleStore } from '@/store/localeStore.js';
+import { formatPrice } from '@/lib/format.js';
+import { MAX_CART_QUANTITY } from '@/config/cart.js';
 
-defineProps({
-  item: {
-    type: Object,
-    required: true
-  }
-});
-const localeStore = useLocaleStore();
+defineProps({ item: { type: Object, required: true } });
 defineEmits(['remove', 'update-quantity']);
+
+const localeStore = useLocaleStore();
 </script>

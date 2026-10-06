@@ -30,7 +30,7 @@
               </TableHeader>
               <TableBody>
                 <TableRow v-if="!loc.variants.length">
-                  <TableCell colspan="5" class="text-center py-6 text-muted-foreground">Нет товаров</TableCell>
+                  <TableCell colspan="6" class="text-center py-6 text-muted-foreground">Нет товаров</TableCell>
                 </TableRow>
                 <TableRow v-for="v in loc.variants" :key="v.id">
                   <TableCell class="font-medium">{{ localeStore.t(v.product_name) }}</TableCell>
@@ -39,7 +39,7 @@
                     <div class="flex items-center gap-2">
                       <span v-if="v.color_hex" class="inline-block w-3.5 h-3.5 rounded-sm border border-black/10 shrink-0"
                         :style="`background:${v.color_hex}`" />
-                      <span class="text-sm">{{ colorLabel(v.color) }}</span>
+                      <span class="text-sm">{{ localeStore.t(v.color) || '—' }}</span>
                     </div>
                   </TableCell>
                   <TableCell>{{ v.size }}</TableCell>
@@ -71,15 +71,6 @@ const localeStore  = useLocaleStore()
 
 const stock   = ref([])
 const loading = ref(false)
-
-function colorLabel(colorJson) {
-  try {
-    const obj = typeof colorJson === 'string' ? JSON.parse(colorJson) : colorJson
-    return localeStore.t(obj)
-  } catch {
-    return colorJson ?? '—'
-  }
-}
 
 onMounted(async () => {
   loading.value = true

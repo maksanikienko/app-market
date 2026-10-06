@@ -15,13 +15,13 @@
               <div class="space-y-1">
                 <Label>Название</Label>
                 <Input v-model="form.name" />
-                <FieldError :error="errors.name" />
+                <FieldError :msgs="errors.name" />
               </div>
 
               <div class="space-y-1">
                 <Label>Код</Label>
                 <Input v-model="form.code" />
-                <FieldError :error="errors.code" />
+                <FieldError :msgs="errors.code" />
               </div>
             </div>
 
@@ -32,7 +32,7 @@
                 rows="5"
                 class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
-              <FieldError :error="errors.description" />
+              <FieldError :msgs="errors.description" />
             </div>
 
             <div class="space-y-1">
@@ -44,7 +44,7 @@
               </Label>
               <img v-if="category?.image" :src="`/storage/${category.image}`" class="w-20 h-20 object-cover rounded" />
               <Input type="file" accept="image/*" @change="e => form.imageFile = e.target.files[0]" />
-              <FieldError :error="errors.image" />
+              <FieldError :msgs="errors.image" />
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -65,14 +65,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import FieldError from '@/components/parts/FieldError.vue'
 import { useAdminCategoryService } from '@/services/adminCategoryService'
 
 const props = defineProps({ id: { type: String, default: null } })
 
 const router = useRouter()
 const { getById, create, update } = useAdminCategoryService()
-
-const FieldError = { props: ['error'], template: `<p v-if="error" class="text-xs text-destructive">{{ error[0] }}</p>` }
 
 const category = ref(null)
 const pageLoading = ref(false)

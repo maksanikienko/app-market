@@ -4,7 +4,7 @@
       <CardHeader class="space-y-2">
         <RouterLink to="/" class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900 transition-colors w-fit">
           <ArrowLeft class="h-3.5 w-3.5" />
-          Home
+          {{ t('auth.home') }}
         </RouterLink>
         <CardTitle class="text-2xl">{{ t('auth.login.title') }}</CardTitle>
         <CardDescription>{{ t('auth.login.subtitle') }}</CardDescription>
@@ -23,7 +23,7 @@
           </div>
 
           <label class="flex items-center gap-2 cursor-pointer text-sm">
-            <input type="checkbox" class="h-4 w-4" />
+            <input type="checkbox" v-model="form.remember" class="h-4 w-4" />
             <span>{{ t('auth.login.remember') }}</span>
           </label>
 
@@ -70,7 +70,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'vue-sonner';
-import { LogIn, Github, Chrome, ArrowLeft } from 'lucide-vue-next';
+import { LogIn, Chrome, ArrowLeft } from 'lucide-vue-next';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -78,7 +78,8 @@ const { t } = useI18n();
 
 const form = reactive({
   email: '',
-  password: ''
+  password: '',
+  remember: false,
 });
 
 const isLoading = ref(false);
@@ -89,16 +90,15 @@ const loginWithGoogle = () => {
 
 const submit = async () => {
   isLoading.value = true;
-
-  const success = await userStore.login(form);
-
-  if (success) {
-    toast.success(t('auth.login.success'));
-    await router.push('/');
-  } else {
-    toast.error(userStore.errors.message || t('auth.login.error'));
+  try {
+    if (await userStore.login(form)) {
+      toast.success(t('auth.login.success'));
+      await router.push('/');
+    } else {
+      toast.error(userStore.errors.message || t('auth.login.error'));
+    }
+  } finally {
+    isLoading.value = false;
   }
-
-  isLoading.value = false;
 };
 </script>
